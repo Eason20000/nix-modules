@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 
@@ -21,6 +22,24 @@ in
     tunnel = {
       enable = lib.mkEnableOption "";
       authorizedKeys = lib.mkOption { type = lib.types.listOf lib.types.str; };
+    };
+    reverseProxy = {
+      enable = lib.mkEnableOption "";
+      proxyHost = lib.mkOption {
+        type = lib.types.str;
+        default = let
+          all = inputs.self.nixosConfigurations or { };
+          hosts = builtins.attrNames all;
+          hasTunnel = name: all.${name}.config.my.nixos.ssh.tunnel.enable or false;
+          tunnelHost = lib.findFirst hasTunnel null hosts;
+        in
+          if tunnelHost != null
+          then "${all.${tunnelHost}.config.my.nixos.base.publicHost or tunnelHost}:${toString (lib.head (all.${tunnelHost}.config.my.nixos.ssh.ports or [ 22 ]))}"
+          else "";
+      };
+      localPort = lib.mkOption { type = lib.types.port; };
+      remotePort = lib.mkOption { type = lib.types.port; };
+      proxyUser = lib.mkOption { type = lib.types.str; default = "ssh-tunnel"; };
     };
   };
 
@@ -48,6 +67,35 @@ in
         openssh.authorizedKeys.keys = cfg.tunnel.authorizedKeys;
       };
 
+    })
+
+    (lib.mkIf cfg.reverseProxy.enable {
+      services.autossh.sessions = [{
+        name = "reverse-ssh";
+        user = "reverse-tunnel";
+        monitoringPort = 0;
+        extraArguments = lib.concatStringsSep " " (
+          [
+            "-N"
+            "-R"
+            "${toString cfg.reverseProxy.remotePort}:localhost:${toString cfg.reverseProxy.localPort}"
+            "${cfg.reverseProxy.proxyUser}@${cfg.reverseProxy.proxyHost}"
+            "-o"
+            "StrictHostKeyChecking=no"
+            "-o"
+            "UserKnownHostsFile=/dev/null"
+          ]
+          ++ lib.optional (config.sops.secrets ? "tunnel-key")
+            "-i ${config.sops.secrets."tunnel-key".path}"
+        );
+      }];
+
+      users.groups.reverse-tunnel = { };
+      users.users.reverse-tunnel = {
+        group = "reverse-tunnel";
+        isSystemUser = true;
+        useDefaultShell = true;
+      };
     })
   ];
 
