@@ -101,6 +101,11 @@ in
         isSystemUser = true;
         useDefaultShell = true;
       };
+
+      systemd.services.autossh-reverse-ssh.serviceConfig = {
+        Restart = lib.mkForce "always";
+        RestartSec = 5;
+      };
     })
   ];
 
