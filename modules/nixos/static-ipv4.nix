@@ -24,6 +24,11 @@ in
       type = lib.types.str;
       example = "192.168.1.1";
     };
+    dns = lib.mkOption {
+      type = lib.types.str;
+      default = cfg.gateway;
+      example = "192.168.1.1";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -38,7 +43,7 @@ in
         method = "manual";
         addresses = cfg.address;
         gateway = cfg.gateway;
-        dns = cfg.gateway;
+        dns = cfg.dns;
       };
     };
 
