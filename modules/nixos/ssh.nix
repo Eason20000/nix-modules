@@ -73,18 +73,23 @@ in
       services.autossh.sessions = [{
         name = "reverse-ssh";
         user = "reverse-tunnel";
-        monitoringPort = 0;
-        extraArguments = lib.concatStringsSep " " (
-          [
+        monitoringPort = 20000;
+        extraArguments = let
+          opts = [
             "-N"
             "-R"
             "${toString cfg.reverseProxy.remotePort}:localhost:${toString cfg.reverseProxy.localPort}"
             "${cfg.reverseProxy.proxyUser}@${cfg.reverseProxy.proxyHost}"
-            "-o"
-            "StrictHostKeyChecking=no"
-            "-o"
-            "UserKnownHostsFile=/dev/null"
-          ]
+            "-o" "StrictHostKeyChecking=no"
+            "-o" "UserKnownHostsFile=/dev/null"
+            "-o" "ServerAliveInterval=30"
+            "-o" "ServerAliveCountMax=3"
+            "-o" "ExitOnForwardFailure=yes"
+            "-o" "TCPKeepAlive=yes"
+            "-o" "ConnectTimeout=10"
+          ];
+        in lib.concatStringsSep " " (
+          opts
           ++ lib.optional (config.sops.secrets ? "tunnel-key")
             "-i ${config.sops.secrets."tunnel-key".path}"
         );

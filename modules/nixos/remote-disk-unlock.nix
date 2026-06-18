@@ -124,8 +124,11 @@ in
             "/etc/secrets/tunnel-key"
             "-o" "StrictHostKeyChecking=no"
             "-o" "UserKnownHostsFile=/dev/null"
-            "-o" "ServerAliveInterval=60"
+            "-o" "ServerAliveInterval=30"
+            "-o" "ServerAliveCountMax=3"
             "-o" "ExitOnForwardFailure=yes"
+            "-o" "TCPKeepAlive=yes"
+            "-o" "ConnectTimeout=10"
           ];
           Restart = "always";
           RestartSec = 5;
