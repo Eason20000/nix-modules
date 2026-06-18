@@ -40,10 +40,6 @@ in
       localPort = lib.mkOption { type = lib.types.port; };
       remotePort = lib.mkOption { type = lib.types.port; };
       proxyUser = lib.mkOption { type = lib.types.str; default = "ssh-tunnel"; };
-      rduPort = lib.mkOption {
-        type = lib.types.nullOr lib.types.port;
-        default = null;
-      };
     };
   };
 
@@ -101,37 +97,7 @@ in
         useDefaultShell = true;
       };
     })
-
-    (lib.mkIf (cfg.reverseProxy.enable && cfg.reverseProxy.rduPort != null) {
-      boot.initrd.secrets."/etc/secrets/tunnel-key" =
-        config.sops.secrets."tunnel-key".path;
-      boot.initrd.systemd.storePaths = [ "${pkgs.openssh}/bin/ssh" ];
-      boot.initrd.systemd.services.reverse-tunnel = {
-        description = "SSH Reverse Tunnel for RDU";
-        wantedBy = [ "initrd.target" ];
-        after = [ "network.target" ];
-        before = [ "sshd.service" ];
-        unitConfig.DefaultDependencies = false;
-        serviceConfig = {
-          Type = "simple";
-          ExecStart = lib.concatStringsSep " " [
-            "${pkgs.openssh}/bin/ssh"
-            "-N"
-            "-R"
-            "${toString cfg.reverseProxy.rduPort}:localhost:${toString cfg.reverseProxy.rduPort}"
-            "${cfg.reverseProxy.proxyUser}@${cfg.reverseProxy.proxyHost}"
-            "-i"
-            "/etc/secrets/tunnel-key"
-            "-o" "StrictHostKeyChecking=no"
-            "-o" "UserKnownHostsFile=/dev/null"
-            "-o" "ServerAliveInterval=60"
-            "-o" "ExitOnForwardFailure=yes"
-          ];
-          Restart = "always";
-          RestartSec = 5;
-        };
-      };
-    })
   ];
+
 
 }
