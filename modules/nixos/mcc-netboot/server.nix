@@ -219,9 +219,7 @@ in
       enable = true;
       openFirewall = true;
       dhcpNoBind = true;
-      kernel = let
-        image = if sys.pkgs.stdenv.hostPlatform.isAarch64 then "Image" else "bzImage";
-      in "${sys.config.system.build.kernel}/${image}";
+      kernel = "${sys.config.system.build.kernel}/bzImage";
       initrd = "${sys.config.system.build.initialRamdisk}/initrd";
       cmdLine = "init=${sys.config.system.build.toplevel}/init host_ip=$\${next-server} loglevel=4";
     };
