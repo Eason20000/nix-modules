@@ -73,10 +73,6 @@ in
 
     })
 
-    (lib.mkIf (cfg.reverseProxy.enable && config.my.nixos.remoteDiskUnlock.enable or false) {
-      my.nixos.ssh.reverseProxy.rduPort = lib.mkDefault config.my.nixos.remoteDiskUnlock.port;
-    })
-
     (lib.mkIf cfg.reverseProxy.enable {
       services.autossh.sessions = [{
         name = "reverse-ssh";
