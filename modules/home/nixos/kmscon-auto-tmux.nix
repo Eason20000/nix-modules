@@ -17,7 +17,7 @@ in
     programs.bash = {
       enable = true;
       initExtra = ''
-        if [ "$COLORTERM" == 'kmscon' ] && [ -z "$TMUX" ]; then
+        if [ "''${TERM_SESSION_TYPE:-}" = kms ] && [ -z "$TMUX" ]; then
           tmux attach-session -t KMSC || tmux new-session -s KMSC
           exit
         fi
