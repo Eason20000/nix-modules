@@ -24,11 +24,15 @@ in
   };
 
   config = lib.mkMerge [
+    (lib.mkIf (cfg.enable && cfg.modelsPreset != { }) {
+      services.llama-cpp.settings.models-preset = builtins.toString (
+        pkgs.writeText "models-preset.ini" (
+          lib.generators.toINI { } cfg.modelsPreset
+        )
+      );
+    })
     (lib.mkIf cfg.enable {
-      services.llama-cpp = {
-        enable = true;
-        modelsPreset = cfg.modelsPreset;
-      };
+      services.llama-cpp.enable = true;
     })
 
     (lib.mkIf (cfg.enable && cfg.preset == "rocm") {
