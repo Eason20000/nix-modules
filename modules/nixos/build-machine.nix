@@ -45,30 +45,21 @@ in
     };
   };
 
-  config =
-    let
-      # Conditionally add publicHostKey when set
-      withHostKey = attrs: attrs // lib.optionalAttrs (cfg.publicHostKey != null) {
-        inherit (cfg) publicHostKey;
-      };
-      # Conditionally add sops sshKey when secret is defined
-      withSshKey = attrs: attrs // lib.optionalAttrs (config.sops.secrets ? "nix-builder.sshkey") {
-        sshKey = config.sops.secrets."nix-builder.sshkey".path;
-      };
-    in
-    lib.mkMerge [
+  config = lib.mkMerge [
     (lib.mkIf (cfg.use && cfg.builderHost != "") {
       nix.distributedBuilds = true;
-      nix.buildMachines = [
-        (withSshKey (withHostKey {
+      nix.buildMachines = [(
+        {
           hostName = cfg.builderHost;
           systems = [ "x86_64-linux" ];
           supportedFeatures = [ "big-parallel" ];
           maxJobs = 4;
           speedFactor = 1;
           sshUser = "nix-builder";
-        }))
-      ];
+        }
+        // lib.optionalAttrs (cfg.sshKeyFile != null) { sshKey = cfg.sshKeyFile; }
+        // lib.optionalAttrs (cfg.publicHostKey != null) { publicHostKey = cfg.publicHostKey; }
+      )];
     })
 
     (lib.mkIf cfg.is {
@@ -80,6 +71,13 @@ in
       };
       users.groups.nix-builder = { };
       nix.settings.trusted-users = [ "nix-builder" ];
+    })
+
+    (lib.mkIf (cfg.use && cfg.sshKeyFile == null) {
+      assertions = [{
+        assertion = false;
+        message = "my.nixos.buildMachine.sshKeyFile must be set when use = true";
+      }];
     })
   ];
 

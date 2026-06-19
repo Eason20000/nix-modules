@@ -49,6 +49,10 @@ in
       };
       proxyUser = lib.mkOption { type = lib.types.str; default = "ssh-tunnel"; };
     };
+    tunnelKeyFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+    };
   };
 
   config = lib.mkMerge [
@@ -94,15 +98,15 @@ in
 
     })
 
-    (lib.mkIf (cfg.enable && cfg.reverseProxy.enable) {
-      sops.templates."tunnel-key-persist" = {
-        path = "/nix/persist/nixos/etc/secrets/tunnel-key";
-        content = config.sops.placeholder.tunnel-key;
-        mode = "0400";
-      };
+    (lib.mkIf (cfg.enable && cfg.reverseProxy.enable && cfg.tunnelKeyFile == null) {
+      assertions = [{
+        assertion = false;
+        message = "my.nixos.remoteDiskUnlock.tunnelKeyFile must be set when reverseProxy.enable = true";
+      }];
+    })
 
-      boot.initrd.secrets."/etc/secrets/tunnel-key" =
-        "/nix/persist/nixos/etc/secrets/tunnel-key";
+    (lib.mkIf (cfg.enable && cfg.reverseProxy.enable && cfg.tunnelKeyFile != null) {
+      boot.initrd.secrets."/etc/secrets/tunnel-key" = cfg.tunnelKeyFile;
 
       boot.initrd.systemd.storePaths = [ "${pkgs.openssh}/bin/ssh" ];
 

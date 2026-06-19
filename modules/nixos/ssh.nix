@@ -40,6 +40,10 @@ in
       localPort = lib.mkOption { type = lib.types.port; };
       remotePort = lib.mkOption { type = lib.types.port; };
       proxyUser = lib.mkOption { type = lib.types.str; default = "ssh-tunnel"; };
+      identityFile = lib.mkOption {
+        type = lib.types.nullOr lib.types.path;
+        default = null;
+      };
     };
   };
 
@@ -69,6 +73,13 @@ in
 
     })
 
+    (lib.mkIf (cfg.reverseProxy.enable && cfg.reverseProxy.identityFile == null) {
+      assertions = [{
+        assertion = false;
+        message = "my.nixos.ssh.reverseProxy.identityFile must be set when enable = true";
+      }];
+    })
+
     (lib.mkIf cfg.reverseProxy.enable {
       services.autossh.sessions = [{
         name = "reverse-ssh";
@@ -90,8 +101,8 @@ in
           ];
         in lib.concatStringsSep " " (
           opts
-          ++ lib.optional (config.sops.secrets ? "tunnel-key")
-            "-i ${config.sops.secrets."tunnel-key".path}"
+          ++ lib.optional (cfg.reverseProxy.identityFile != null)
+            "-i ${cfg.reverseProxy.identityFile}"
         );
       }];
 
