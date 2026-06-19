@@ -13,7 +13,10 @@ in
 {
   options.my.nixos.remoteDiskUnlock = {
     enable = lib.mkEnableOption "";
-    useDerivation = lib.mkEnableOption "";
+    hostKeys = lib.mkOption {
+      type = lib.types.listOf lib.types.path;
+      default = [ ];
+    };
     port = lib.mkOption {
       type = lib.types.port;
       default = 2222;
@@ -78,22 +81,7 @@ in
         authorizedKeys =
           lib.map (key: ''command="systemctl default" '' + key)
             config.users.users.${config.my.nixos.base.primaryUser}.openssh.authorizedKeys.keys;
-        hostKeys =
-          if cfg.useDerivation then
-            let
-              ed25519Key = pkgs.runCommand "initrd-ssh-host-ed25519" { }
-                "${pkgs.openssh}/bin/ssh-keygen -t ed25519 -N \"\" -f $out";
-              rsaKey = pkgs.runCommand "initrd-ssh-host-rsa" { }
-                "${pkgs.openssh}/bin/ssh-keygen -t rsa -N \"\" -f $out";
-            in
-            [
-              (builtins.unsafeDiscardStringContext ed25519Key.outPath)
-              (builtins.unsafeDiscardStringContext rsaKey.outPath)
-            ]
-          else [
-            "/etc/secrets/initrd/ssh_host_rsa_key"
-            "/etc/secrets/initrd/ssh_host_ed25519_key"
-          ];
+        hostKeys = cfg.hostKeys;
       };
 
     })
