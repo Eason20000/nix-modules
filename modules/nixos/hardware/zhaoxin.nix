@@ -26,7 +26,7 @@ in
       options zx_core zx_freezable_patch=2 zx_hotplug_polling_enable=1 zx_vesa_tempbuffer_enable=1 zx_recovery_enable=1 zx_pwm_mode=2 zx_force_3dblt=1
     '';
 
-    environment.variables.WLR_RENDERER = "pixman";
+    hardware.graphics.extraPackages = [ pkgs.zhaoxin-userspace-driver ];
   };
 
 }
