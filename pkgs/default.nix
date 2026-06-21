@@ -18,6 +18,13 @@ in
       system-status = final.callPackage ./system-status.nix { };
       mihomo-tui = final.callPackage ./mihomo-tui.nix { };
 
+      llama-cpp-turboquant = final.callPackage ./llama-cpp-turboquant.nix {
+        inherit (prev) llama-cpp;
+      };
+      llama-cpp-turboquant-rocm = final.callPackage ./llama-cpp-turboquant.nix {
+        llama-cpp = prev.llama-cpp.override { rocmSupport = true; };
+      };
+
       zhaoxin-userspace-driver = final.callPackage ./zhaoxin-userspace-driver.nix {
         debSrc = zhaoxinKX6000Deb;
       };

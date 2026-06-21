@@ -36,6 +36,11 @@ in
       hardware.graphics.extraPackages = [ pkgs.rocmPackages.clr.icd ];
     })
 
+    (lib.mkIf (cfg.enable && cfg.preset == "rocm-turboquant") {
+      services.llama-cpp.package = pkgs.llama-cpp-turboquant-rocm;
+      hardware.graphics.extraPackages = [ pkgs.rocmPackages.clr.icd ];
+    })
+
     (lib.mkIf (cfg.enable && cfg.preset == "cuda") {
       services.llama-cpp.package = (pkgs.llama-cpp.override { cudaSupport = true; });
     })
