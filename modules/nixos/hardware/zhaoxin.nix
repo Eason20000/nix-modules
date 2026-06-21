@@ -44,6 +44,14 @@ in
           VendorName "ZhaoXin Graphics, Inc."
       EndSection
     '';
+
+    environment.variables = {
+      # VA-API: libva scans /run/opengl-driver/lib/dri/*_drv_video.so
+      LIBVA_DRIVER_NAME = "zx";
+      # VDPAU: libvdpau searches this directory for backends
+      VDPAU_DRIVER_PATH = "/run/opengl-driver/lib/vdpau";
+    };
+    environment.sessionVariables.GBM_BACKENDS_PATH = "/run/opengl-driver/lib/gbm";
   };
 
 }
