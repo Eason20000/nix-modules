@@ -9,6 +9,9 @@
   libx11,
   libxrandr,
   libxcb,
+  libxext,
+  libxrender,
+  libudev-zero,
 }:
 
 let
@@ -28,6 +31,9 @@ stdenv.mkDerivation {
     libx11
     libxrandr
     libxcb
+    libxext
+    libxrender
+    libudev-zero
   ];
 
   dontBuild = true;
@@ -65,6 +71,17 @@ stdenv.mkDerivation {
     mkdir -p $out/lib/vdpau
     cp -v usr/lib/x86_64-linux-gnu/libvdpau_zx.so $out/lib/vdpau/
 
+    mkdir -p $out/lib/xorg/modules/drivers
+    cp -v usr/lib/xorg/modules/drivers/zx_drv.so $out/lib/xorg/modules/drivers/
+
+    mkdir -p $out/lib/xorg/modules/extensions
+    cp -v usr/lib/xorg/modules/extensions/libglx_zx.so $out/lib/xorg/modules/extensions/
+
+    mkdir -p $out/share/X11/xorg.conf.d
+    cp -v usr/share/X11/xorg.conf.d/10-zxgpu.conf $out/share/X11/xorg.conf.d/
+    sed -i '/MatchDriver "zx"/a\    Option      "GlxVendorLibrary" "zx"' \
+      $out/share/X11/xorg.conf.d/10-zxgpu.conf
+
     mkdir -p $out/share/drirc.d
     cp -v usr/share/drirc.d/01-zx_drv.conf $out/share/drirc.d/
 
@@ -78,12 +95,13 @@ stdenv.mkDerivation {
     description = "Zhaoxin KX-6000 Userspace Graphics Driver (version ${version})";
     homepage = "https://www.zhaoxin.com/";
     longDescription = ''
-      DRI-only deployment for Zhaoxin KX-6000 integrated graphics.
-      Ships the Gallium DRI driver (zx_dri.so) plus the kernel
-      interface library (libkeinterface_zx.so).  Does NOT include
-      Zhaoxin's EGL/GLX vendor libs or glapi fork — Mesa's own
-      GL dispatch loads the DRI driver directly, avoiding the
-      glapi symbol conflict.
+      Userspace components for Zhaoxin KX-6000 integrated graphics:
+      Gallium DRI driver (zx_dri.so), kernel interface library
+      (libkeinterface_zx.so), GBM/VDPAU backends, and the Xorg DDX
+      driver (zx_drv.so) with GLX extension (libglx_zx.so).  Does
+      NOT include Zhaoxin's EGL/GLX vendor libs or glapi fork —
+      Mesa's own GL dispatch loads the DRI driver directly, avoiding
+      the glapi symbol conflict.
     '';
   };
 }

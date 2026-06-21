@@ -27,6 +27,23 @@ in
     '';
 
     hardware.graphics.extraPackages = [ pkgs.zhaoxin-userspace-driver ];
+
+    services.xserver.modules = [ pkgs.zhaoxin-userspace-driver ];
+
+    services.xserver.extraConfig = ''
+      Section "OutputClass"
+          Identifier "zx"
+          MatchDriver "zx"
+          Driver "zx"
+          Option "GlxVendorLibrary" "zx"
+      EndSection
+
+      Section "Device"
+          Identifier "VideoCard1"
+          Driver "zx"
+          VendorName "ZhaoXin Graphics, Inc."
+      EndSection
+    '';
   };
 
 }
