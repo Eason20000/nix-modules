@@ -36,14 +36,8 @@ in
           "nix-command"
           "flakes"
         ];
-        auto-optimise-store = true;
       }
     ];
-    nix.gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 7d";
-    };
 
     # - Sad but you have no choice
     nixpkgs.config.allowUnfree = true;

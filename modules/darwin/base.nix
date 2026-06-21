@@ -32,19 +32,7 @@ in
       ];
     };
 
-    nix.optimise.automatic = true;
-
     nixpkgs.hostPlatform = "aarch64-darwin";
-
-    nix.gc = {
-      automatic = true;
-      interval = {
-        Hour = 0;
-        Minute = 0;
-        Weekday = 0;
-      };
-      options = "--delete-older-than 7d";
-    };
 
     environment.systemPackages = with pkgs; [
       git
