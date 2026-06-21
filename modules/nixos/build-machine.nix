@@ -1,4 +1,10 @@
-{ config, lib, pkgs, inputs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
 
 let
   cfg = config.my.nixos.buildMachine;
@@ -16,20 +22,25 @@ in
       default =
         let
           allConfigs = inputs.self.nixosConfigurations or { };
-          builderName = lib.findFirst (name:
-            allConfigs.${name}.config.my.nixos.buildMachine.is or false
+          builderName = lib.findFirst (
+            name: allConfigs.${name}.config.my.nixos.buildMachine.is or false
           ) null (builtins.attrNames allConfigs);
-          builderPort = builtins.toString
-            (if builderName != null then
+          builderPort = builtins.toString (
+            if builderName != null then
               lib.head (allConfigs.${builderName}.config.my.nixos.ssh.ports or [ 22 ])
-            else 22);
-          builderPublicHost = if builderName != null then
-            allConfigs.${builderName}.config.my.nixos.base.publicHost or builderName
-          else null;
+            else
+              22
+          );
+          builderPublicHost =
+            if builderName != null then
+              allConfigs.${builderName}.config.my.nixos.base.publicHost or builderName
+            else
+              null;
         in
-        if builderName != null && builderPublicHost != null
-        then "${builderPublicHost}:${builderPort}"
-        else "";
+        if builderName != null && builderPublicHost != null then
+          "${builderPublicHost}:${builderPort}"
+        else
+          "";
     };
     sshKeyFile = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
@@ -48,18 +59,22 @@ in
   config = lib.mkMerge [
     (lib.mkIf (cfg.use && cfg.builderHost != "") {
       nix.distributedBuilds = true;
-      nix.buildMachines = [(
-        {
-          hostName = cfg.builderHost;
-          systems = [ "x86_64-linux" ];
-          supportedFeatures = [ "big-parallel" ];
-          maxJobs = 4;
-          speedFactor = 1;
-          sshUser = "nix-builder";
-        }
-        // lib.optionalAttrs (cfg.sshKeyFile != null) { sshKey = cfg.sshKeyFile; }
-        // lib.optionalAttrs (cfg.publicHostKey != null) { publicHostKey = cfg.publicHostKey; }
-      )];
+      nix.buildMachines = [
+        (
+          {
+            hostName = cfg.builderHost;
+            systems = [ "x86_64-linux" ];
+            supportedFeatures = [ "big-parallel" ];
+            maxJobs = 4;
+            speedFactor = 1;
+            sshUser = "nix-builder";
+          }
+          // lib.optionalAttrs (cfg.sshKeyFile != null) { sshKey = cfg.sshKeyFile; }
+          // lib.optionalAttrs (cfg.publicHostKey != null) {
+            publicHostKey = cfg.publicHostKey;
+          }
+        )
+      ];
     })
 
     (lib.mkIf cfg.is {
@@ -74,10 +89,12 @@ in
     })
 
     (lib.mkIf (cfg.use && cfg.sshKeyFile == null) {
-      assertions = [{
-        assertion = false;
-        message = "my.nixos.buildMachine.sshKeyFile must be set when use = true";
-      }];
+      assertions = [
+        {
+          assertion = false;
+          message = "my.nixos.buildMachine.sshKeyFile must be set when use = true";
+        }
+      ];
     })
   ];
 

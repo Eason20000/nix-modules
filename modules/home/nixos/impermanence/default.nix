@@ -1,4 +1,10 @@
-{ config, lib, my, osConfig, ... }:
+{
+  config,
+  lib,
+  my,
+  osConfig,
+  ...
+}:
 
 let
   cfg = config.my.home.impermanence;

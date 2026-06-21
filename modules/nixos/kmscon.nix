@@ -1,4 +1,9 @@
-{ pkgs, lib, config, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 
 let
   cfg = config.my.nixos.kmscon;
@@ -27,38 +32,37 @@ in
 
     services.kmscon = {
       enable = true;
-      config =
-        {
-          term = "xterm-direct";
-          hwaccel = true;
-          font-name = "Unifont";
-          font-size = font-size;
-          palette = "custom";
-          palette-black = "36,31,49";
-          palette-red = "192,28,40";
-          palette-green = "46,194,126";
-          palette-yellow = "245,194,17";
-          palette-blue = "30,120,228";
-          palette-magenta = "152,65,187";
-          palette-cyan = "10,185,220";
-          palette-light-grey = "192,191,188";
-          palette-dark-grey = "94,92,100";
-          palette-light-red = "237,51,59";
-          palette-light-green = "87,227,137";
-          palette-light-yellow = "248,228,92";
-          palette-light-blue = "81,161,255";
-          palette-light-magenta = "192,97,203";
-          palette-light-cyan = "79,210,253";
-          palette-white = "246,245,244";
-          palette-foreground = "246,245,244";
-          palette-background = "28,28,31";
-          xkb-options = "caps:ctrl_shifted_capslock";
-          xkb-repeat-delay = 250;
-          xkb-repeat-rate = 32;
-          multi-monitor = "largest";
-          dpms-timeout = 300;
-        }
-        // lib.optionalAttrs (cfg.mode != null) { mode = cfg.mode; };
+      config = {
+        term = "xterm-direct";
+        hwaccel = true;
+        font-name = "Unifont";
+        font-size = font-size;
+        palette = "custom";
+        palette-black = "36,31,49";
+        palette-red = "192,28,40";
+        palette-green = "46,194,126";
+        palette-yellow = "245,194,17";
+        palette-blue = "30,120,228";
+        palette-magenta = "152,65,187";
+        palette-cyan = "10,185,220";
+        palette-light-grey = "192,191,188";
+        palette-dark-grey = "94,92,100";
+        palette-light-red = "237,51,59";
+        palette-light-green = "87,227,137";
+        palette-light-yellow = "248,228,92";
+        palette-light-blue = "81,161,255";
+        palette-light-magenta = "192,97,203";
+        palette-light-cyan = "79,210,253";
+        palette-white = "246,245,244";
+        palette-foreground = "246,245,244";
+        palette-background = "28,28,31";
+        xkb-options = "caps:ctrl_shifted_capslock";
+        xkb-repeat-delay = 250;
+        xkb-repeat-rate = 32;
+        multi-monitor = "largest";
+        dpms-timeout = 300;
+      }
+      // lib.optionalAttrs (cfg.mode != null) { mode = cfg.mode; };
     };
 
   };

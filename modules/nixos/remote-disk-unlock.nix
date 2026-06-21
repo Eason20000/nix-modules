@@ -40,17 +40,24 @@ in
       enable = lib.mkEnableOption "";
       proxyHost = lib.mkOption {
         type = lib.types.str;
-        default = let
-          all = inputs.self.nixosConfigurations or { };
-          hosts = builtins.attrNames all;
-          hasTunnel = name: all.${name}.config.my.nixos.ssh.tunnel.enable or false;
-          tunnelHost = lib.findFirst hasTunnel null hosts;
-        in
-          if tunnelHost != null
-          then "${all.${tunnelHost}.config.my.nixos.base.publicHost or tunnelHost}:${toString (lib.head (all.${tunnelHost}.config.my.nixos.ssh.ports or [ 22 ]))}"
-          else "";
+        default =
+          let
+            all = inputs.self.nixosConfigurations or { };
+            hosts = builtins.attrNames all;
+            hasTunnel = name: all.${name}.config.my.nixos.ssh.tunnel.enable or false;
+            tunnelHost = lib.findFirst hasTunnel null hosts;
+          in
+          if tunnelHost != null then
+            "${all.${tunnelHost}.config.my.nixos.base.publicHost or tunnelHost}:${
+              toString (lib.head (all.${tunnelHost}.config.my.nixos.ssh.ports or [ 22 ]))
+            }"
+          else
+            "";
       };
-      proxyUser = lib.mkOption { type = lib.types.str; default = "ssh-tunnel"; };
+      proxyUser = lib.mkOption {
+        type = lib.types.str;
+        default = "ssh-tunnel";
+      };
     };
     tunnelKeyFile = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
@@ -87,10 +94,12 @@ in
     })
 
     (lib.mkIf (cfg.enable && cfg.reverseProxy.enable && cfg.tunnelKeyFile == null) {
-      assertions = [{
-        assertion = false;
-        message = "my.nixos.remoteDiskUnlock.tunnelKeyFile must be set when reverseProxy.enable = true";
-      }];
+      assertions = [
+        {
+          assertion = false;
+          message = "my.nixos.remoteDiskUnlock.tunnelKeyFile must be set when reverseProxy.enable = true";
+        }
+      ];
     })
 
     (lib.mkIf (cfg.enable && cfg.reverseProxy.enable && cfg.tunnelKeyFile != null) {
@@ -114,13 +123,20 @@ in
             "${cfg.reverseProxy.proxyUser}@${cfg.reverseProxy.proxyHost}"
             "-i"
             "/etc/secrets/tunnel-key"
-            "-o" "StrictHostKeyChecking=no"
-            "-o" "UserKnownHostsFile=/dev/null"
-            "-o" "ServerAliveInterval=30"
-            "-o" "ServerAliveCountMax=3"
-            "-o" "ExitOnForwardFailure=yes"
-            "-o" "TCPKeepAlive=yes"
-            "-o" "ConnectTimeout=10"
+            "-o"
+            "StrictHostKeyChecking=no"
+            "-o"
+            "UserKnownHostsFile=/dev/null"
+            "-o"
+            "ServerAliveInterval=30"
+            "-o"
+            "ServerAliveCountMax=3"
+            "-o"
+            "ExitOnForwardFailure=yes"
+            "-o"
+            "TCPKeepAlive=yes"
+            "-o"
+            "ConnectTimeout=10"
           ];
           Restart = "always";
           RestartSec = 5;

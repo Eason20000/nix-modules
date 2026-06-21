@@ -1,4 +1,9 @@
-{ pkgs, inputs, my, ... }:
+{
+  pkgs,
+  inputs,
+  my,
+  ...
+}:
 
 {
   home-manager = {

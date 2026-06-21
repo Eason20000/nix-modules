@@ -1,4 +1,11 @@
-{ config, lib, pkgs, my, osConfig, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  my,
+  osConfig,
+  ...
+}:
 
 let
   cfg = config.my.home.base;

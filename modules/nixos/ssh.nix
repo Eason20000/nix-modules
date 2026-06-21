@@ -27,19 +27,26 @@ in
       enable = lib.mkEnableOption "";
       proxyHost = lib.mkOption {
         type = lib.types.str;
-        default = let
-          all = inputs.self.nixosConfigurations or { };
-          hosts = builtins.attrNames all;
-          hasTunnel = name: all.${name}.config.my.nixos.ssh.tunnel.enable or false;
-          tunnelHost = lib.findFirst hasTunnel null hosts;
-        in
-          if tunnelHost != null
-          then "${all.${tunnelHost}.config.my.nixos.base.publicHost or tunnelHost}:${toString (lib.head (all.${tunnelHost}.config.my.nixos.ssh.ports or [ 22 ]))}"
-          else "";
+        default =
+          let
+            all = inputs.self.nixosConfigurations or { };
+            hosts = builtins.attrNames all;
+            hasTunnel = name: all.${name}.config.my.nixos.ssh.tunnel.enable or false;
+            tunnelHost = lib.findFirst hasTunnel null hosts;
+          in
+          if tunnelHost != null then
+            "${all.${tunnelHost}.config.my.nixos.base.publicHost or tunnelHost}:${
+              toString (lib.head (all.${tunnelHost}.config.my.nixos.ssh.ports or [ 22 ]))
+            }"
+          else
+            "";
       };
       localPort = lib.mkOption { type = lib.types.port; };
       remotePort = lib.mkOption { type = lib.types.port; };
-      proxyUser = lib.mkOption { type = lib.types.str; default = "ssh-tunnel"; };
+      proxyUser = lib.mkOption {
+        type = lib.types.str;
+        default = "ssh-tunnel";
+      };
       identityFile = lib.mkOption {
         type = lib.types.nullOr lib.types.path;
         default = null;
@@ -74,37 +81,51 @@ in
     })
 
     (lib.mkIf (cfg.reverseProxy.enable && cfg.reverseProxy.identityFile == null) {
-      assertions = [{
-        assertion = false;
-        message = "my.nixos.ssh.reverseProxy.identityFile must be set when enable = true";
-      }];
+      assertions = [
+        {
+          assertion = false;
+          message = "my.nixos.ssh.reverseProxy.identityFile must be set when enable = true";
+        }
+      ];
     })
 
     (lib.mkIf cfg.reverseProxy.enable {
-      services.autossh.sessions = [{
-        name = "reverse-ssh";
-        user = "reverse-tunnel";
-        monitoringPort = 20000;
-        extraArguments = let
-          opts = [
-            "-N"
-            "-R"
-            "${toString cfg.reverseProxy.remotePort}:localhost:${toString cfg.reverseProxy.localPort}"
-            "${cfg.reverseProxy.proxyUser}@${cfg.reverseProxy.proxyHost}"
-            "-o" "StrictHostKeyChecking=no"
-            "-o" "UserKnownHostsFile=/dev/null"
-            "-o" "ServerAliveInterval=30"
-            "-o" "ServerAliveCountMax=3"
-            "-o" "ExitOnForwardFailure=yes"
-            "-o" "TCPKeepAlive=yes"
-            "-o" "ConnectTimeout=10"
-          ];
-        in lib.concatStringsSep " " (
-          opts
-          ++ lib.optional (cfg.reverseProxy.identityFile != null)
-            "-i ${cfg.reverseProxy.identityFile}"
-        );
-      }];
+      services.autossh.sessions = [
+        {
+          name = "reverse-ssh";
+          user = "reverse-tunnel";
+          monitoringPort = 20000;
+          extraArguments =
+            let
+              opts = [
+                "-N"
+                "-R"
+                "${toString cfg.reverseProxy.remotePort}:localhost:${toString cfg.reverseProxy.localPort}"
+                "${cfg.reverseProxy.proxyUser}@${cfg.reverseProxy.proxyHost}"
+                "-o"
+                "StrictHostKeyChecking=no"
+                "-o"
+                "UserKnownHostsFile=/dev/null"
+                "-o"
+                "ServerAliveInterval=30"
+                "-o"
+                "ServerAliveCountMax=3"
+                "-o"
+                "ExitOnForwardFailure=yes"
+                "-o"
+                "TCPKeepAlive=yes"
+                "-o"
+                "ConnectTimeout=10"
+              ];
+            in
+            lib.concatStringsSep " " (
+              opts
+              ++ lib.optional (
+                cfg.reverseProxy.identityFile != null
+              ) "-i ${cfg.reverseProxy.identityFile}"
+            );
+        }
+      ];
 
       users.groups.reverse-tunnel = { };
       users.users.reverse-tunnel = {
@@ -119,6 +140,5 @@ in
       };
     })
   ];
-
 
 }

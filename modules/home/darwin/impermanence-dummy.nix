@@ -1,4 +1,9 @@
-{ lib, my, osConfig, ... }:
+{
+  lib,
+  my,
+  osConfig,
+  ...
+}:
 
 {
   options.my.home.impermanence = {
