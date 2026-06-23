@@ -33,7 +33,12 @@ in
 
   config = lib.mkIf cfg.enable {
 
-    networking.networkmanager.settings.main.no-auto-default = cfg.interface;
+    networking.networkmanager.settings = {
+      device = {
+        match-device = "interface-name:${cfg.interface}";
+        "keep-configuration" = false;
+      };
+    };
 
     networking.networkmanager.ensureProfiles.profiles.static-ipv4 = {
       connection = {
