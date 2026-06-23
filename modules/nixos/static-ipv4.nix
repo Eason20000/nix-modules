@@ -32,6 +32,9 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+
+    networking.networkmanager.settings.main.no-auto-default = cfg.interface;
+
     networking.networkmanager.ensureProfiles.profiles.static-ipv4 = {
       connection = {
         id = "static-ipv4";
