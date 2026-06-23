@@ -35,11 +35,23 @@ in
             tunnelHost = lib.findFirst hasTunnel null hosts;
           in
           if tunnelHost != null then
-            "${all.${tunnelHost}.config.my.nixos.base.publicHost or tunnelHost}:${
-              toString (lib.head (all.${tunnelHost}.config.my.nixos.ssh.ports or [ 22 ]))
-            }"
+            all.${tunnelHost}.config.my.nixos.base.publicHost or tunnelHost
           else
             "";
+      };
+      proxyPort = lib.mkOption {
+        type = lib.types.port;
+        default =
+          let
+            all = inputs.self.nixosConfigurations or { };
+            hosts = builtins.attrNames all;
+            hasTunnel = name: all.${name}.config.my.nixos.ssh.tunnel.enable or false;
+            tunnelHost = lib.findFirst hasTunnel null hosts;
+          in
+          if tunnelHost != null then
+            lib.head (all.${tunnelHost}.config.my.nixos.ssh.ports or [ 22 ])
+          else
+            22;
       };
       localPort = lib.mkOption { type = lib.types.port; };
       remotePort = lib.mkOption { type = lib.types.port; };
@@ -101,6 +113,8 @@ in
                 "-N"
                 "-R"
                 "${toString cfg.reverseProxy.remotePort}:localhost:${toString cfg.reverseProxy.localPort}"
+                "-p"
+                "${toString cfg.reverseProxy.proxyPort}"
                 "${cfg.reverseProxy.proxyUser}@${cfg.reverseProxy.proxyHost}"
                 "-o"
                 "StrictHostKeyChecking=no"
