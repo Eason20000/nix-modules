@@ -146,7 +146,7 @@ in
             ++ [
               "-N"
               "-R"
-              "${toString cfg.port}:localhost:${toString cfg.port}"
+              "0.0.0.0:${toString cfg.port}:localhost:${toString cfg.port}"
               "-p"
               "${toString cfg.reverseProxy.proxyPort}"
               "${cfg.reverseProxy.proxyUser}@${cfg.reverseProxy.proxyHost}"
