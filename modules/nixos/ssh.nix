@@ -90,6 +90,21 @@ in
         openssh.authorizedKeys.keys = cfg.tunnel.authorizedKeys;
       };
 
+      networking.firewall.allowedTCPPorts =
+        let
+          all = inputs.self.nixosConfigurations or { };
+          rduHosts = lib.filterAttrs (
+            _: h:
+            h.config.my.nixos.remoteDiskUnlock.reverseProxy.enable or false
+            &&
+              (h.config.my.nixos.remoteDiskUnlock.reverseProxy.proxyHost or "")
+              == (config.my.nixos.base.publicHost or "")
+          ) all;
+        in
+        lib.mapAttrsToList (
+          _: h: h.config.my.nixos.remoteDiskUnlock.port or 2222
+        ) rduHosts;
+
     })
 
     (lib.mkIf (cfg.reverseProxy.enable && cfg.reverseProxy.identityFile == null) {
