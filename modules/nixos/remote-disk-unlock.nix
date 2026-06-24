@@ -36,6 +36,11 @@ in
       default = config.my.nixos.staticIpv4.gateway or null;
       example = "192.168.1.1";
     };
+    dns = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = config.my.nixos.staticIpv4.dns or null;
+      example = "192.168.1.1";
+    };
     reverseProxy = {
       enable = lib.mkEnableOption "";
       proxyHost = lib.mkOption {
@@ -88,7 +93,7 @@ in
             (lib.mkIf (cfg.staticIp != null) {
               Address = cfg.staticIp;
               Gateway = cfg.gateway;
-              DNS = config.my.nixos.staticIpv4.dns or cfg.gateway;
+              DNS = cfg.dns;
             })
           ];
         };
@@ -132,34 +137,37 @@ in
         serviceConfig = {
           Type = "simple";
           ExecStartPre = "${pkgs.coreutils}/bin/chmod 0600 /etc/secrets/tunnel-key";
-          ExecStart = lib.concatStringsSep " " ([
-            "${pkgs.autossh}/bin/autossh"
-            "-M"
-            "0"
-          ] ++ [
-            "-N"
-            "-R"
-            "${toString cfg.port}:localhost:${toString cfg.port}"
-            "-p"
-            "${toString cfg.reverseProxy.proxyPort}"
-            "${cfg.reverseProxy.proxyUser}@${cfg.reverseProxy.proxyHost}"
-            "-i"
-            "/etc/secrets/tunnel-key"
-            "-o"
-            "StrictHostKeyChecking=no"
-            "-o"
-            "UserKnownHostsFile=/dev/null"
-            "-o"
-            "ServerAliveInterval=30"
-            "-o"
-            "ServerAliveCountMax=3"
-            "-o"
-            "ExitOnForwardFailure=yes"
-            "-o"
-            "TCPKeepAlive=yes"
-            "-o"
-            "ConnectTimeout=10"
-          ]);
+          ExecStart = lib.concatStringsSep " " (
+            [
+              "${pkgs.autossh}/bin/autossh"
+              "-M"
+              "0"
+            ]
+            ++ [
+              "-N"
+              "-R"
+              "${toString cfg.port}:localhost:${toString cfg.port}"
+              "-p"
+              "${toString cfg.reverseProxy.proxyPort}"
+              "${cfg.reverseProxy.proxyUser}@${cfg.reverseProxy.proxyHost}"
+              "-i"
+              "/etc/secrets/tunnel-key"
+              "-o"
+              "StrictHostKeyChecking=no"
+              "-o"
+              "UserKnownHostsFile=/dev/null"
+              "-o"
+              "ServerAliveInterval=30"
+              "-o"
+              "ServerAliveCountMax=3"
+              "-o"
+              "ExitOnForwardFailure=yes"
+              "-o"
+              "TCPKeepAlive=yes"
+              "-o"
+              "ConnectTimeout=10"
+            ]
+          );
           Restart = "always";
           RestartSec = 5;
         };
