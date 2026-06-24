@@ -117,7 +117,10 @@ in
     (lib.mkIf (cfg.enable && cfg.reverseProxy.enable && cfg.tunnelKeyFile != null) {
       boot.initrd.secrets."/etc/secrets/tunnel-key" = cfg.tunnelKeyFile;
 
-      boot.initrd.systemd.storePaths = [ "${pkgs.openssh}/bin/ssh" ];
+      boot.initrd.systemd.storePaths = [
+        "${pkgs.openssh}/bin/ssh"
+        "${pkgs.autossh}/bin/autossh"
+      ];
 
       boot.initrd.systemd.services.reverse-tunnel = {
         description = "SSH Reverse Tunnel for RDU";
@@ -127,8 +130,11 @@ in
         unitConfig.DefaultDependencies = false;
         serviceConfig = {
           Type = "simple";
-          ExecStart = lib.concatStringsSep " " [
-            "${pkgs.openssh}/bin/ssh"
+          ExecStart = lib.concatStringsSep " " ([
+            "${pkgs.autossh}/bin/autossh"
+            "-M"
+            "0"
+          ] ++ [
             "-N"
             "-R"
             "${toString cfg.port}:localhost:${toString cfg.port}"
@@ -151,7 +157,7 @@ in
             "TCPKeepAlive=yes"
             "-o"
             "ConnectTimeout=10"
-          ];
+          ]);
           Restart = "always";
           RestartSec = 5;
         };
