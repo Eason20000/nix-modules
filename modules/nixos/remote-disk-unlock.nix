@@ -120,6 +120,7 @@ in
       boot.initrd.systemd.storePaths = [
         "${pkgs.openssh}/bin/ssh"
         "${pkgs.autossh}/bin/autossh"
+        "${pkgs.coreutils}/bin/chmod"
       ];
 
       boot.initrd.systemd.services.reverse-tunnel = {
@@ -130,6 +131,7 @@ in
         unitConfig.DefaultDependencies = false;
         serviceConfig = {
           Type = "simple";
+          ExecStartPre = "${pkgs.coreutils}/bin/chmod 0600 /etc/secrets/tunnel-key";
           ExecStart = lib.concatStringsSep " " ([
             "${pkgs.autossh}/bin/autossh"
             "-M"
