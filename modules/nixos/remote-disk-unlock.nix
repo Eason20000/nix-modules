@@ -84,6 +84,8 @@ in
 
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {
+      services.resolved.settings.Resolve.DNS = [ cfg.dns ];
+
       boot.initrd.systemd.network = {
         enable = true;
         networks."10-wired" = {
