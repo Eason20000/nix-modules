@@ -85,7 +85,6 @@ in
 
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {
-      services.resolved.settings.Resolve.DNS = [ cfg.dns ];
 
       boot.initrd.systemd.network = {
         enable = true;
@@ -127,8 +126,9 @@ in
 
       boot.initrd.systemd.storePaths = [
         "${pkgs.openssh}/bin/ssh"
-        "${pkgs.autossh}/bin/autossh"
         "${pkgs.coreutils}/bin/chmod"
+        "${pkgs.bash}/bin/bash"
+        "${pkgs.dnsutils}/bin/dig"
       ];
 
       boot.initrd.systemd.services.reverse-tunnel = {
@@ -141,34 +141,25 @@ in
           Type = "simple";
           ExecStartPre = "${pkgs.coreutils}/bin/chmod 0600 /etc/secrets/tunnel-key";
           ExecStart = lib.concatStringsSep " " (
-            [
-              "${pkgs.autossh}/bin/autossh"
-              "-M"
-              "0"
-            ]
+            [ "${pkgs.bash}/bin/bash" "-c" ]
             ++ [
-              "-N"
-              "-R"
-              "0.0.0.0:${toString cfg.port}:localhost:${toString cfg.port}"
-              "-p"
-              "${toString cfg.reverseProxy.proxyPort}"
-              "${cfg.reverseProxy.proxyUser}@${cfg.reverseProxy.proxyHost}"
-              "-i"
-              "/etc/secrets/tunnel-key"
-              "-o"
-              "StrictHostKeyChecking=no"
-              "-o"
-              "UserKnownHostsFile=/dev/null"
-              "-o"
-              "ServerAliveInterval=30"
-              "-o"
-              "ServerAliveCountMax=3"
-              "-o"
-              "ExitOnForwardFailure=yes"
-              "-o"
-              "TCPKeepAlive=yes"
-              "-o"
-              "ConnectTimeout=10"
+              (lib.escapeShellArg (
+                "IP=$(${pkgs.dnsutils}/bin/dig +short +time=5 +tries=1 ${cfg.reverseProxy.proxyHost} | head -1)"
+                + "; [ -z \"$IP\" ] && exit 1"
+                + "; exec ${pkgs.openssh}/bin/ssh"
+                + " -N"
+                + " -R 0.0.0.0:${toString cfg.port}:localhost:${toString cfg.port}"
+                + " -p ${toString cfg.reverseProxy.proxyPort}"
+                + " ${cfg.reverseProxy.proxyUser}@$IP"
+                + " -i /etc/secrets/tunnel-key"
+                + " -o StrictHostKeyChecking=no"
+                + " -o UserKnownHostsFile=/dev/null"
+                + " -o ServerAliveInterval=30"
+                + " -o ServerAliveCountMax=3"
+                + " -o ExitOnForwardFailure=yes"
+                + " -o TCPKeepAlive=yes"
+                + " -o ConnectTimeout=10"
+              ))
             ]
           );
           Restart = "always";
