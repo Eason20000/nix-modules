@@ -3,6 +3,7 @@
   lib,
   pkgs,
   inputs,
+  my,
   ...
 }:
 
@@ -30,9 +31,9 @@ in
         default =
           let
             all = inputs.self.nixosConfigurations or { };
-            hosts = builtins.attrNames all;
-            hasTunnel = name: all.${name}.config.my.nixos.ssh.tunnel.enable or false;
-            tunnelHost = lib.findFirst hasTunnel null hosts;
+            tunnelHost = my.lib.findFirstHost all (
+              h: h.config.my.nixos.ssh.tunnel.enable or false
+            );
           in
           if tunnelHost != null then
             all.${tunnelHost}.config.my.nixos.base.publicHost or tunnelHost
@@ -44,9 +45,9 @@ in
         default =
           let
             all = inputs.self.nixosConfigurations or { };
-            hosts = builtins.attrNames all;
-            hasTunnel = name: all.${name}.config.my.nixos.ssh.tunnel.enable or false;
-            tunnelHost = lib.findFirst hasTunnel null hosts;
+            tunnelHost = my.lib.findFirstHost all (
+              h: h.config.my.nixos.ssh.tunnel.enable or false
+            );
           in
           if tunnelHost != null then
             lib.head (all.${tunnelHost}.config.my.nixos.ssh.ports or [ 22 ])
@@ -93,17 +94,23 @@ in
       networking.firewall.allowedTCPPorts =
         let
           all = inputs.self.nixosConfigurations or { };
-          rduHosts = lib.filterAttrs (
-            _: h:
+          myHost = config.my.nixos.base.publicHost or "";
+          rduPred =
+            h:
             h.config.my.nixos.remoteDiskUnlock.reverseProxy.enable or false
-            &&
-              (h.config.my.nixos.remoteDiskUnlock.reverseProxy.proxyHost or "")
-              == (config.my.nixos.base.publicHost or "")
-          ) all;
+            && (h.config.my.nixos.remoteDiskUnlock.reverseProxy.proxyHost or "") == myHost;
+          rduPorts = my.lib.collectHostValues all rduPred (
+            h: h.config.my.nixos.remoteDiskUnlock.port or 2222
+          );
+          proxyPred =
+            h:
+            h.config.my.nixos.ssh.reverseProxy.enable or false
+            && (h.config.my.nixos.ssh.reverseProxy.proxyHost or "") == myHost;
+          proxyPorts = my.lib.collectHostValues all proxyPred (
+            h: h.config.my.nixos.ssh.reverseProxy.remotePort or null
+          );
         in
-        lib.mapAttrsToList (
-          _: h: h.config.my.nixos.remoteDiskUnlock.port or 2222
-        ) rduHosts;
+        lib.filter (p: p != null) (rduPorts ++ proxyPorts);
 
     })
 
@@ -127,7 +134,7 @@ in
               opts = [
                 "-N"
                 "-R"
-                "${toString cfg.reverseProxy.remotePort}:localhost:${toString cfg.reverseProxy.localPort}"
+                "0.0.0.0:${toString cfg.reverseProxy.remotePort}:localhost:${toString cfg.reverseProxy.localPort}"
                 "-p"
                 "${toString cfg.reverseProxy.proxyPort}"
                 "${cfg.reverseProxy.proxyUser}@${cfg.reverseProxy.proxyHost}"

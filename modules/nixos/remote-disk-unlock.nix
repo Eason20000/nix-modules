@@ -3,6 +3,7 @@
   lib,
   pkgs,
   inputs,
+  my,
   ...
 }:
 
@@ -48,9 +49,9 @@ in
         default =
           let
             all = inputs.self.nixosConfigurations or { };
-            hosts = builtins.attrNames all;
-            hasTunnel = name: all.${name}.config.my.nixos.ssh.tunnel.enable or false;
-            tunnelHost = lib.findFirst hasTunnel null hosts;
+            tunnelHost = my.lib.findFirstHost all (
+              h: h.config.my.nixos.ssh.tunnel.enable or false
+            );
           in
           if tunnelHost != null then
             all.${tunnelHost}.config.my.nixos.base.publicHost or tunnelHost
@@ -62,9 +63,9 @@ in
         default =
           let
             all = inputs.self.nixosConfigurations or { };
-            hosts = builtins.attrNames all;
-            hasTunnel = name: all.${name}.config.my.nixos.ssh.tunnel.enable or false;
-            tunnelHost = lib.findFirst hasTunnel null hosts;
+            tunnelHost = my.lib.findFirstHost all (
+              h: h.config.my.nixos.ssh.tunnel.enable or false
+            );
           in
           if tunnelHost != null then
             lib.head (all.${tunnelHost}.config.my.nixos.ssh.ports or [ 22 ])

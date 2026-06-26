@@ -3,6 +3,7 @@
   lib,
   pkgs,
   inputs,
+  my,
   ...
 }:
 
@@ -21,19 +22,19 @@ in
       type = lib.types.str;
       default =
         let
-          allConfigs = inputs.self.nixosConfigurations or { };
-          builderName = lib.findFirst (
-            name: allConfigs.${name}.config.my.nixos.buildMachine.is or false
-          ) null (builtins.attrNames allConfigs);
+          all = inputs.self.nixosConfigurations or { };
+          builderName = my.lib.findFirstHost all (
+            h: h.config.my.nixos.buildMachine.is or false
+          );
           builderPort = builtins.toString (
             if builderName != null then
-              lib.head (allConfigs.${builderName}.config.my.nixos.ssh.ports or [ 22 ])
+              lib.head (all.${builderName}.config.my.nixos.ssh.ports or [ 22 ])
             else
               22
           );
           builderPublicHost =
             if builderName != null then
-              allConfigs.${builderName}.config.my.nixos.base.publicHost or builderName
+              all.${builderName}.config.my.nixos.base.publicHost or builderName
             else
               null;
         in
