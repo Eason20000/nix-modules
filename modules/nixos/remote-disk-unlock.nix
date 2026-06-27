@@ -141,7 +141,10 @@ in
           Type = "simple";
           ExecStartPre = "${pkgs.coreutils}/bin/chmod 0600 /etc/secrets/tunnel-key";
           ExecStart = lib.concatStringsSep " " (
-            [ "${pkgs.bash}/bin/bash" "-c" ]
+            [
+              "${pkgs.bash}/bin/bash"
+              "-c"
+            ]
             ++ [
               (lib.escapeShellArg (
                 "IP=$(${pkgs.dnsutils}/bin/dig +short +time=5 +tries=1 @${cfg.dns} ${cfg.reverseProxy.proxyHost} | head -1)"
