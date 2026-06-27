@@ -39,7 +39,7 @@ in
     };
     dns = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
-      default = config.my.nixos.staticIpv4.dns or null;
+      default = cfg.gateway;
       example = "192.168.1.1";
     };
     reverseProxy = {
@@ -144,7 +144,7 @@ in
             [ "${pkgs.bash}/bin/bash" "-c" ]
             ++ [
               (lib.escapeShellArg (
-                "IP=$(${pkgs.dnsutils}/bin/dig +short +time=5 +tries=1 ${cfg.reverseProxy.proxyHost} | head -1)"
+                "IP=$(${pkgs.dnsutils}/bin/dig +short +time=5 +tries=1 @${cfg.dns} ${cfg.reverseProxy.proxyHost} | head -1)"
                 + "; [ -z \"$IP\" ] && exit 1"
                 + "; exec ${pkgs.openssh}/bin/ssh"
                 + " -N"
