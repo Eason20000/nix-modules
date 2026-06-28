@@ -14,7 +14,7 @@
 
   home.packages = with pkgs; [
     firefox
-    inputs.gamemaker-flake.packages.x86_64-linux.ide-latest-beta
+    inputs.gamemaker-flake.packages.x86_64-linux.ide-lts-2026
     godotPackages_4_6.godot
     gimp3-with-plugins
     prismlauncher
@@ -49,8 +49,8 @@
     ".local/share/PrismLauncher"
     ".wine"
     ".local/share/wineprefixes"
-    ".local/share/GameMakerStudio2-Beta"
-    ".config/GameMakerStudio2-Beta"
+    ".local/share/GameMakerStudio2"
+    ".config/GameMakerStudio2"
     ".local/share/netease-cloud-music-gtk4"
     ".local/share/lutris"
     ".config/lutris"
