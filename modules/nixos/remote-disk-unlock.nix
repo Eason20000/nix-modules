@@ -127,7 +127,6 @@ in
       boot.initrd.systemd.storePaths = [
         "${pkgs.openssh}/bin/ssh"
         "${pkgs.coreutils}/bin/chmod"
-        "${pkgs.bash}/bin/bash"
         "${pkgs.dnsutils}/bin/dig"
       ];
 
@@ -139,35 +138,26 @@ in
         unitConfig.DefaultDependencies = false;
         serviceConfig = {
           Type = "simple";
-          ExecStartPre = "${pkgs.coreutils}/bin/chmod 0600 /etc/secrets/tunnel-key";
-          ExecStart = lib.concatStringsSep " " (
-            [
-              "${pkgs.bash}/bin/bash"
-              "-c"
-            ]
-            ++ [
-              (lib.escapeShellArg (
-                "IP=$(${pkgs.dnsutils}/bin/dig +short +time=5 +tries=1 @${cfg.dns} ${cfg.reverseProxy.proxyHost} | head -1)"
-                + "; [ -z \"$IP\" ] && exit 1"
-                + "; exec ${pkgs.openssh}/bin/ssh"
-                + " -N"
-                + " -R 0.0.0.0:${toString cfg.port}:localhost:${toString cfg.port}"
-                + " -p ${toString cfg.reverseProxy.proxyPort}"
-                + " ${cfg.reverseProxy.proxyUser}@$IP"
-                + " -i /etc/secrets/tunnel-key"
-                + " -o StrictHostKeyChecking=no"
-                + " -o UserKnownHostsFile=/dev/null"
-                + " -o ServerAliveInterval=30"
-                + " -o ServerAliveCountMax=3"
-                + " -o ExitOnForwardFailure=yes"
-                + " -o TCPKeepAlive=yes"
-                + " -o ConnectTimeout=10"
-              ))
-            ]
-          );
           Restart = "always";
           RestartSec = 5;
         };
+        script = ''
+          ${pkgs.coreutils}/bin/chmod 0600 /etc/secrets/tunnel-key
+          IP=$(${pkgs.dnsutils}/bin/dig +short +time=5 +tries=1 @${cfg.dns} ${cfg.reverseProxy.proxyHost} | head -1)
+          [ -z "$IP" ] && { echo "DNS: empty response"; exit 1; }
+          exec ${pkgs.openssh}/bin/ssh -N \
+            -R 0.0.0.0:${toString cfg.port}:localhost:${toString cfg.port} \
+            -p ${toString cfg.reverseProxy.proxyPort} \
+            ${cfg.reverseProxy.proxyUser}@$IP \
+            -i /etc/secrets/tunnel-key \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=3 \
+            -o ExitOnForwardFailure=yes \
+            -o TCPKeepAlive=yes \
+            -o ConnectTimeout=10
+        '';
       };
     })
   ];
