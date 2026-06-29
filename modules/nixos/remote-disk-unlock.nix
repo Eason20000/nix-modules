@@ -143,7 +143,7 @@ in
         };
         script = ''
           ${pkgs.coreutils}/bin/chmod 0600 /etc/secrets/tunnel-key
-          IP=$(${pkgs.dnsutils}/bin/dig +short +time=5 +tries=1 @${cfg.dns} ${cfg.reverseProxy.proxyHost} | head -1)
+          IP=$(${pkgs.dnsutils}/bin/dig +short +time=5 +tries=1 A @${cfg.dns} ${cfg.reverseProxy.proxyHost} | head -1)
           [ -z "$IP" ] && { echo "DNS: empty response"; exit 1; }
           exec ${pkgs.openssh}/bin/ssh -N \
             -R 0.0.0.0:${toString cfg.port}:localhost:${toString cfg.port} \
