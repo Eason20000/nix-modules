@@ -16,8 +16,24 @@ in
 
   config = lib.mkIf cfg.enable {
     services = {
-      desktopManager.plasma6.enable = true;
-      displayManager.plasma-login-manager.enable = true;
+      desktopManager.gnome.enable = true;
+      displayManager.gdm = {
+        enable = true;
+        autoSuspend = false;
+      };
+      gnome.gnome-remote-desktop.enable = true;
+    };
+
+    services.gnome.gnome-software.enable = lib.mkForce false;
+
+    networking.firewall = rec {
+      allowedTCPPortRanges = [
+        {
+          from = 1714;
+          to = 1764;
+        }
+      ];
+      allowedUDPPortRanges = allowedTCPPortRanges;
     };
 
     boot = {
@@ -68,16 +84,17 @@ in
       enableDefaultPackages = true;
       packages = with pkgs; [
         corefonts
+        adwaita-fonts
+        nerd-fonts.adwaita-mono
         noto-fonts
         noto-fonts-cjk-sans
         noto-fonts-cjk-serif
         noto-fonts-color-emoji
-        hack-font
       ];
       fontconfig = {
         defaultFonts = {
           sansSerif = [
-            "Noto Sans"
+            "Adwaita Sans"
             "Noto Sans CJK SC"
           ];
           serif = [
@@ -85,25 +102,55 @@ in
             "Noto Serif CJK SC"
           ];
           monospace = [
-            "Hack"
+            "AdwaitaMono Nerd Font"
             "Noto Sans Mono CJK SC"
           ];
         };
       };
     };
 
+    environment.gnome.excludePackages = [ pkgs.gnome-tour ];
+
+    environment.systemPackages = with pkgs; [
+      file-roller
+      mission-center
+      nufraw-thumbnailer
+    ];
+
+    programs.dconf.profiles.gdm.databases = [
+      {
+        lockAll = true;
+        settings = {
+          "org/gnome/desktop/interface" = {
+            document-font-name = "Sans 11";
+            font-name = "Sans 11";
+            monospace-font-name = "Monospace 11";
+          };
+          "org/gnome/mutter" = {
+            experimental-features = [ "scale-monitor-framebuffer" ];
+          };
+        };
+      }
+    ];
+
     i18n.inputMethod = {
       enable = true;
-      type = "fcitx5";
-      fcitx5 = {
-        waylandFrontend = true;
-        addons = with pkgs; [
-          kdePackages.fcitx5-chinese-addons
-          fcitx5-pinyin-zhwiki
-          fcitx5-pinyin-moegirl
-          fcitx5-pinyin-minecraft
-        ];
-      };
+      type = "ibus";
+      ibus.engines = with pkgs.ibus-engines; [
+        (rime.override {
+          rimeDataPkgs = with pkgs; [
+            rime-data
+            rime-zhwiki
+            rime-moegirl
+            rime-ice
+          ];
+        })
+      ];
+    };
+
+    environment.variables = {
+      "GTK_IM_MODULE" = lib.mkForce null;
+      "QT_IM_MODULE" = lib.mkForce null;
     };
 
   };

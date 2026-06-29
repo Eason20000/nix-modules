@@ -8,6 +8,7 @@
 
 {
   imports = [
+    ./gnome
     ./obs.nix
     ./flatpak.nix
   ];
