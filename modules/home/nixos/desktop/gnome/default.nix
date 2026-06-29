@@ -12,6 +12,7 @@ in
   imports = [
     ./extensions.nix
     ./ghostty.nix
+    ./theme.nix
   ];
 
   programs.gnome-shell.enable = true;
@@ -62,7 +63,15 @@ in
       "caps:ctrl_shifted_capslock"
     ];
 
-    "org/gnome/desktop/interface".show-battery-percentage = true;
+    "org/gnome/desktop/interface" = {
+      show-battery-percentage = true;
+      accent-color = "orange";
+      gtk-theme = "adw-gtk3-dark";
+      color-scheme = "prefer-dark";
+      document-font-name = "Sans 11";
+      font-name = "Sans 11";
+      monospace-font-name = "Monospace 11";
+    };
 
     "org/gnome/desktop/wm/preferences" = {
       button-layout = "appmenu:minimize,maximize,close";
@@ -136,5 +145,20 @@ in
     "org/gnome/file-roller/ui".view-sidebar = true;
 
   };
+
+  xdg.configFile = {
+    "ibus/rime/ibus_rime.custom.yaml".text = ''
+      patch:
+        style:
+          horizontal: true
+    '';
+    "ibus/rime/default.custom.yaml".text = ''
+      patch:
+        schema_list:
+          - schema: rime_ice
+    '';
+  };
+
+  my.home.impermanence.extraDirectories = [ ".config/ibus/rime" ];
 
 }

@@ -17,6 +17,7 @@ in
     (final: prev: {
       system-status = final.callPackage ./system-status.nix { };
       mihomo-tui = final.callPackage ./mihomo-tui.nix { };
+      libadwaita-kde-kvantum = final.callPackage ./libadwaita-kde-kvantum.nix { };
 
       llama-cpp-turboquant = final.callPackage ./llama-cpp-turboquant.nix {
         inherit (prev) llama-cpp;
