@@ -161,4 +161,6 @@ in
 
   my.home.impermanence.extraDirectories = [ ".config/ibus/rime" ];
 
+  my.home.impermanence.extraFiles = [ ".config/monitors.xml" ];
+
 }

@@ -127,6 +127,7 @@ in
 
     "org/gnome/shell/extensions/power-off-options" = {
       show-hybrid-sleep = true;
+      show-settings = true;
     };
 
     "org/gnome/shell/extensions/top-bar-organizer" = {
