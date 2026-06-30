@@ -25,6 +25,9 @@ in
       llama-cpp-turboquant-rocm = final.callPackage ./llama-cpp-turboquant.nix {
         llama-cpp = prev.llama-cpp.override { rocmSupport = true; };
       };
+      llama-cpp-turboquant-cuda = final.callPackage ./llama-cpp-turboquant.nix {
+        llama-cpp = prev.llama-cpp.override { cudaSupport = true; };
+      };
 
       zhaoxin-userspace-driver = final.callPackage ./zhaoxin-userspace-driver.nix {
         debSrc = zhaoxinKX6000Deb;

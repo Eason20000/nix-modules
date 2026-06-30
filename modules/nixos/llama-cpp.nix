@@ -45,6 +45,10 @@ in
       services.llama-cpp.package = (pkgs.llama-cpp.override { cudaSupport = true; });
     })
 
+    (lib.mkIf (cfg.enable && cfg.preset == "cuda-turboquant") {
+      services.llama-cpp.package = pkgs.llama-cpp-turboquant-cuda;
+    })
+
   ];
 
 }
