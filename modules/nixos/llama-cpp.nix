@@ -49,6 +49,16 @@ in
       services.llama-cpp.package = pkgs.llama-cpp-turboquant-cuda;
     })
 
+    (lib.mkIf (cfg.enable && cfg.preset == "cuda-turboquant-86") {
+      services.llama-cpp.package =
+        pkgs.llama-cpp-turboquant-cuda.overrideAttrs
+          (old: {
+            cmakeFlags = (old.cmakeFlags or [ ]) ++ [
+              (lib.cmakeFeature "CMAKE_CUDA_ARCHITECTURES" "86")
+            ];
+          });
+    })
+
   ];
 
 }
