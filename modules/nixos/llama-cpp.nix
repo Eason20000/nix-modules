@@ -36,7 +36,7 @@ in
     })
     (lib.mkIf cfg.enable { services.llama-cpp.enable = true; })
     (lib.mkIf cfg.enable {
-      services.llama-cpp.extraFlags = [ "--models-max" (toString cfg.modelsMax) ];
+      services.llama-cpp.settings.models-max = cfg.modelsMax;
     })
 
     (lib.mkIf (cfg.enable && cfg.preset == "rocm") {
