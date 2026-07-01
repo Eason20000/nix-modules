@@ -21,6 +21,11 @@ in
       type = lib.types.submodule { freeformType = lib.types.attrs; };
       default = { };
     };
+    modelsMax = lib.mkOption {
+      type = lib.types.int;
+      default = 4;
+      description = "Maximum number of models loaded simultaneously in router mode";
+    };
   };
 
   config = lib.mkMerge [
@@ -30,6 +35,9 @@ in
       );
     })
     (lib.mkIf cfg.enable { services.llama-cpp.enable = true; })
+    (lib.mkIf cfg.enable {
+      services.llama-cpp.extraFlags = [ "--models-max" (toString cfg.modelsMax) ];
+    })
 
     (lib.mkIf (cfg.enable && cfg.preset == "rocm") {
       services.llama-cpp.package = pkgs.llama-cpp-rocm;
