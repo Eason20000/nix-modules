@@ -1,0 +1,94 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+
+let
+  cfg = config.my.nixos.llama-cpp;
+
+in
+{
+  options.my.nixos.llama-cpp = {
+    enable = lib.mkEnableOption "";
+    preset = lib.mkOption {
+      type = lib.types.str;
+      default = "cuda";
+      example = "rocm";
+    };
+    modelsPreset = lib.mkOption {
+      type = lib.types.submodule { freeformType = lib.types.attrs; };
+      default = { };
+    };
+    modelsMax = lib.mkOption {
+      type = lib.types.int;
+      default = 4;
+      description = "Maximum number of models loaded simultaneously in router mode";
+    };
+    memoryHigh = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+    };
+    memoryMax = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+    };
+  };
+
+  config = lib.mkMerge [
+    (lib.mkIf (cfg.enable && cfg.modelsPreset != { }) {
+      services.llama-cpp.settings.models-preset = builtins.toString (
+        pkgs.writeText "models-preset.ini" (lib.generators.toINI { } cfg.modelsPreset)
+      );
+    })
+    (lib.mkIf cfg.enable {
+      systemd.services.llama-cpp.serviceConfig.MemorySwapMax = 0;
+      services.llama-cpp = {
+        enable = true;
+        settings = {
+          models-max = cfg.modelsMax;
+          port = 9931; # remove when https://github.com/ggml-org/llama.cpp/pull/26116 is merged
+        };
+      };
+    })
+    (lib.mkIf (cfg.enable && cfg.memoryHigh != null) {
+      systemd.services.llama-cpp.serviceConfig.MemoryHigh = cfg.memoryHigh;
+    })
+    (lib.mkIf (cfg.enable && cfg.memoryMax != null) {
+      systemd.services.llama-cpp.serviceConfig.MemoryMax = cfg.memoryMax;
+    })
+
+    (lib.mkIf (cfg.enable && cfg.preset == "rocm") {
+      services.llama-cpp.package = pkgs.llama-cpp-rocm;
+      hardware.graphics.extraPackages = [ pkgs.rocmPackages.clr.icd ];
+    })
+
+    (lib.mkIf (cfg.enable && cfg.preset == "rocm-turboquant") {
+      services.llama-cpp.package = pkgs.llama-cpp-turboquant-rocm;
+      hardware.graphics.extraPackages = [ pkgs.rocmPackages.clr.icd ];
+    })
+
+    (lib.mkIf (cfg.enable && cfg.preset == "cuda") {
+      services.llama-cpp.package = (pkgs.llama-cpp.override { cudaSupport = true; });
+    })
+
+    (lib.mkIf (cfg.enable && cfg.preset == "cuda-turboquant") {
+      services.llama-cpp.package = pkgs.llama-cpp-turboquant-cuda;
+    })
+
+    (lib.mkIf (cfg.enable && cfg.preset == "cuda-turboquant-86") {
+      services.llama-cpp.package = pkgs.llama-cpp-turboquant-cuda.overrideAttrs (old: {
+        cmakeFlags = (old.cmakeFlags or [ ]) ++ [
+          (lib.cmakeFeature "CMAKE_CUDA_ARCHITECTURES" "86")
+        ];
+      });
+    })
+
+    (lib.mkIf (cfg.enable && cfg.preset == "vulkan-turboquant") {
+      services.llama-cpp.package = pkgs.llama-cpp-turboquant-vulkan;
+    })
+
+  ];
+
+}

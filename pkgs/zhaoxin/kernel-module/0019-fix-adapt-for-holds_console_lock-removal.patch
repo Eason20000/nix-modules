@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nix-config <local>
+Date: Tue, 13 Oct 2026 00:00:00 +0000
+Subject: [PATCH] fix: adapt for holds_console_lock removal backported to
+ 6.18.55
+
+Upstream 7910d69376cd ("drm/client: Remove holds_console_lock parameter
+from suspend/resume") was backported to stable as 0589706ace3b, first
+shipped in 6.18.55. There drm_client_dev_suspend/resume take only the
+device (see include/drm/drm_client_event.h), so the two-argument compat
+shim from 0016 must not apply on 6.18.55+.
+
+Link: https://git.kernel.org/torvalds/c/7910d69376cd
+---
+ src/zx_pcie.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/zx_pcie.c b/src/zx_pcie.c
+--- a/src/zx_pcie.c
++++ b/src/zx_pcie.c
+@@ -166,6 +166,6 @@
+ #define drm_client_dev_resume(dev) \
+ 	zx_fbdev_set_suspend((dev)->dev_private, 0)
+-#elif LINUX_VERSION_CODE < KERNEL_VERSION(6, 19, 0)
++#elif LINUX_VERSION_CODE < KERNEL_VERSION(6, 18, 55)
+ #define drm_client_dev_suspend(x) (drm_client_dev_suspend)((x), false)
+ #define drm_client_dev_resume(x) (drm_client_dev_resume)((x), false)
+ #endif
