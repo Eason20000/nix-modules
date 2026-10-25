@@ -1,7 +1,8 @@
 # AGENTS.md
 
 Reusable Nix module library. Consumed by personal private configurations through
-the flake outputs `nixosModules`, `darwinModules`, and `homeModules`.
+the flake outputs `nixosModules`, `darwinModules`, and `homeModules` (plus the
+`homeManagerModules` alias), along with `lib.my` and `formatter`.
 
 ## Layout
 
@@ -67,6 +68,13 @@ No CI, tests, devShell, or flake checks. Verify by building a consuming host;
 
 `pkgs/zhaoxin` and `modules/nixos/mcc-netboot.nix` use `requireFile`. They only
 need the local file when the affected derivation is built.
+
+## Documentation boundary
+
+Every change to outputs, required consumer inputs, module behavior/conventions,
+package local-file notes, or the verification workflow must update this
+`AGENTS.md` and/or `README.md` in the same commit. If consumers must update
+their flake input or lockfile, call that out in the commit body.
 
 ## Commit style
 

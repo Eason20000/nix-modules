@@ -90,6 +90,12 @@ Some packages use `requireFile` and therefore need local files at build time:
 There is no CI, test suite, or devShell. Verify changes by building a consuming
 host, and run `nix fmt` before committing.
 
+## Documentation
+
+This README and `AGENTS.md` are part of the public interface. Update them in the
+same commit when outputs, required inputs, module behavior, package notes, or
+the verification workflow changes.
+
 ## License
 
 GPL-3.0-only. See `LICENSE`.
