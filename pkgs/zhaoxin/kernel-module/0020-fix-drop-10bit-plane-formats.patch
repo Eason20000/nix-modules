@@ -1,0 +1,28 @@
+fix: do not advertise 10-bit plane formats
+
+DrmFormat2CBiosFormat() only maps ARGB2101010; the XRGB/XBGR/ABGR
+2101010 formats fall through to A8R8G8B8, so the display engine decodes
+a 10-bit scanout buffer as 8-bit. GNOME/Mutter picks XRGB2101010 (seen
+via drm_info on the ESN20-2TBUD lock screen), which produces the highly
+saturated, garbled colors. Advertise 8-bit formats only until the 10-bit
+mapping is fixed and tested.
+
+--- a/src/zx_disp.c
++++ b/src/zx_disp.c
+@@ -46,10 +46,12 @@
+     DRM_FORMAT_XBGR8888,
+     DRM_FORMAT_ARGB8888,
+     DRM_FORMAT_ABGR8888,
+-    DRM_FORMAT_XRGB2101010,
+-    DRM_FORMAT_XBGR2101010,
+-    DRM_FORMAT_ARGB2101010,
+-    DRM_FORMAT_ABGR2101010,
++    /*
++     * Do not advertise 10-bit scanout: DrmFormat2CBiosFormat() only maps
++     * ARGB2101010, so XRGB/XBGR/ABGR2101010 fall back to A8R8G8B8 and the
++     * display engine decodes 10-bit pixels as 8-bit, corrupting colors.
++     * Keep 8-bit until the 10-bit mapping is fixed and tested.
++     */
+     DRM_FORMAT_YUYV,
+     DRM_FORMAT_YVYU,
+     DRM_FORMAT_UYVY,

@@ -69,6 +69,15 @@ No CI, tests, devShell, or flake checks. Verify by building a consuming host;
 `pkgs/zhaoxin` and `modules/nixos/mcc-netboot.nix` use `requireFile`. They only
 need the local file when the affected derivation is built.
 
+## Zhaoxin 10-bit scanout
+
+`pkgs/zhaoxin/kernel-module/0020-fix-drop-10bit-plane-formats.patch` removes
+the 10-bit plane formats from `chx_plane_formats[]`. The vendor
+`DrmFormat2CBiosFormat()` only maps `ARGB2101010`; the XRGB/XBGR/ABGR variants
+fall through to `A8R8G8B8`, so GNOME/Mutter's `XRGB2101010` scanout buffer is
+decoded as 8-bit and colors are corrupted. Do not re-add the 10-bit formats
+without fixing the mapping and testing on KX-6000.
+
 ## Documentation boundary
 
 Every change to outputs, required consumer inputs, module behavior/conventions,

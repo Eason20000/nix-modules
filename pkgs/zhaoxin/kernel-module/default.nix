@@ -31,6 +31,9 @@ let
     # Local delta (not upstream): holds_console_lock removal backported
     # to 6.18.55, see patch header for links.
     ./0019-fix-adapt-for-holds_console_lock-removal.patch
+    # Local delta: stop advertising 10-bit plane formats until
+    # DrmFormat2CBiosFormat() maps XRGB/XBGR/ABGR2101010 correctly.
+    ./0020-fix-drop-10bit-plane-formats.patch
   ];
 in
 stdenv.mkDerivation {

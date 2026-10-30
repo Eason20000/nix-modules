@@ -82,7 +82,12 @@ destination path is configurable via `my.nixos.remoteDiskUnlock.tunnelKeyPath`.
 
 Some packages use `requireFile` and therefore need local files at build time:
 
-- `pkgs/zhaoxin`: the vendor Zhaoxin graphics driver `.deb`.
+- `pkgs/zhaoxin`: the vendor Zhaoxin graphics driver `.deb`. The kernel
+  module also drops the 10-bit plane formats: the vendor
+  `DrmFormat2CBiosFormat()` only maps `ARGB2101010`, so compositors that pick
+  `XRGB2101010` (GNOME/Mutter does) get their 10-bit buffer decoded as 8-bit
+  ARGB and colors are corrupted. 8-bit scanout is forced until the mapping is
+  fixed and tested.
 - `modules/nixos/mcc-netboot.nix`: the `mcc-netboot.tar` archive.
 
 ## Verification
