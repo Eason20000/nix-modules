@@ -47,7 +47,7 @@ in
       noto-fonts-color-emoji
     ];
 
-    #environment.enableAllTerminfo = true;
+    environment.enableAllTerminfo = true;
 
     nixpkgs.config.allowUnfree = true;
 
