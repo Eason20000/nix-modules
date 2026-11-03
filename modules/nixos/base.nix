@@ -40,7 +40,12 @@ in
     ];
 
     # - Sad but you have no choice
-    nixpkgs.config.allowUnfree = true;
+    nixpkgs.config = {
+      allowUnfree = true;
+      problems.handlers = {
+        "gtk+".broken = "warn";
+      };
+    };
 
     # System essentials
     environment.systemPackages = with pkgs; [
