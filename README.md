@@ -81,8 +81,8 @@ destination path is configurable via `my.nixos.remoteDiskUnlock.tunnelKeyPath`.
 ## NixOS boot behavior
 
 `modules/nixos/hardware/lvm-autoactivation.nix` is enabled by default. With
-systemd stage 1 and LVM, it adds a stage-2 `vgchange -aay --autoactivation
-event` service before `local-fs-pre.target`. This completes LVM autoactivation
+LVM, it adds a stage-2 `vgchange -aay --autoactivation event` service before
+`local-fs-pre.target`. This completes LVM autoactivation
 when the udev transient `lvm-activate-<VG>` service was stopped by
 `initrd-cleanup` during switch-root, which would otherwise leave a VG inactive
 and make its mounts time out after 90 seconds. It respects

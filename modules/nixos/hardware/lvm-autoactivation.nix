@@ -26,7 +26,7 @@ in
     };
   };
 
-  config = lib.mkIf (cfg.enable && config.boot.initrd.systemd.enable && config.services.lvm.enable) {
+  config = lib.mkIf (cfg.enable && config.services.lvm.enable) {
     systemd.services.lvm-autoactivation = {
       description = "Complete LVM autoactivation after initrd switch-root";
       wantedBy = [ "local-fs-pre.target" ];

@@ -58,10 +58,9 @@ in
     };
 
     # Some preferred services
-    #environment.enableAllTerminfo = true;
+    environment.enableAllTerminfo = true;
     networking.networkmanager.enable = true;
     services.power-profiles-daemon.enable = true;
-    boot.initrd.systemd.enable = true;
 
   };
 

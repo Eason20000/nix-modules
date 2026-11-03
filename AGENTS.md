@@ -52,7 +52,7 @@ is not SOPS coupling.
 `modules/nixos/hardware/lvm-autoactivation.nix` is on by default and must stay
 imported via `hardware/default.nix`. It runs `vgchange -aay --autoactivation
 event` in stage 2 before `local-fs-pre.target` to recover LVM autoactivation
-that `initrd-cleanup` killed at switch-root. It is gated on systemd stage 1 and
+that `initrd-cleanup` killed at switch-root. It is gated on
 `services.lvm.enable`, and respects `event_activation = 0` and LVM
 autoactivation filters; do not replace it with `vgchange -ay`.
 
