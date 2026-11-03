@@ -5,7 +5,7 @@
     enable = true;
     plugins = with pkgs.obs-studio-plugins; [
       obs-vaapi
-      #obs-move-transition
+      obs-move-transition
     ];
   };
 
