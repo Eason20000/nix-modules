@@ -202,7 +202,6 @@ let
                 "rd.systemd.show_status=auto"
               ];
               consoleLogLevel = 3;
-              initrd.verbose = false;
               plymouth.enable = true;
             };
 
