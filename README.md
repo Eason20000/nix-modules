@@ -90,6 +90,15 @@ and make its mounts time out after 90 seconds. It respects
 autoactivation flags. Disable it with
 `my.nixos.hardware.lvmAutoactivation.enable = false`.
 
+`modules/nixos/hardware/mdadm-monitor.nix` is enabled by default and only
+applies when `boot.swraid.enable` is true. NixOS warns and `mdmon` crashes when
+`/etc/mdadm.conf` has neither `MAILADDR` nor `PROGRAM`; the module adds
+`PROGRAM ${pkgs.coreutils}/bin/true` as a `mkDefault`, so a host that declares
+its own `boot.swraid.mdadmConf` (for example `MAILADDR root`) keeps its
+directives. Disable it with
+`my.nixos.hardware.mdadmMonitor.enable = false`, or change the handler with
+`my.nixos.hardware.mdadmMonitor.program`.
+
 ## Packages requiring local files
 
 Some packages use `requireFile` and therefore need local files at build time:

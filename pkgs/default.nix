@@ -21,7 +21,11 @@ in
       libadwaita-kde-kvantum = final.callPackage ./libadwaita-kde-kvantum.nix { };
 
       domino = final.callPackage ./domino.nix {
-        inherit (inputs.erosanix.lib.${pkgs.system}) mkWindowsAppNoCC copyDesktopIcons makeDesktopIcon;
+        inherit (inputs.erosanix.lib.${final.stdenv.hostPlatform.system})
+          mkWindowsAppNoCC
+          copyDesktopIcons
+          makeDesktopIcon
+          ;
       };
 
       wine-d2d1-dcomp = final.callPackage ./wine-d2d1-dcomp.nix { };

@@ -6,6 +6,7 @@
     ./zhaoxin.nix
     ./teac.nix
     ./lvm-autoactivation.nix
+    ./mdadm-monitor.nix
   ];
 
 }

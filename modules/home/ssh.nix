@@ -49,6 +49,9 @@ in
 
   config = lib.mkIf cfg.enable {
     programs.ssh.enable = true;
+    # The home-manager defaults match OpenSSH's built-in defaults; opt out
+    # of the deprecated implicit config instead of duplicating them here.
+    programs.ssh.enableDefaultConfig = false;
     programs.ssh.settings = blocks;
   };
 

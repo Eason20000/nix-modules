@@ -48,7 +48,9 @@ in
         enable = true;
         settings = {
           models-max = cfg.modelsMax;
-          port = 9931; # remove when https://github.com/ggml-org/llama.cpp/pull/26116 is merged
+          # Router mode uses this port; remove the override when
+          # https://github.com/ggml-org/llama.cpp/issues/26116 lands.
+          port = 9931;
         };
       };
     })

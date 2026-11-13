@@ -34,7 +34,6 @@ mkWindowsAppNoCC rec {
     "$HOME/.config/${pname}/IniFiles" = "drive_c/${pname}/IniFiles";
     "$HOME/.config/${pname}/Module" = "drive_c/${pname}/Module";
   };
-  fileMapDuringAppInstall = true;
 
   graphicsDriver = "prefer-wayland";
 

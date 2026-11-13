@@ -56,6 +56,12 @@ that `initrd-cleanup` killed at switch-root. It is gated on
 `services.lvm.enable`, and respects `event_activation = 0` and LVM
 autoactivation filters; do not replace it with `vgchange -ay`.
 
+`modules/nixos/hardware/mdadm-monitor.nix` is on by default and must stay
+imported via `hardware/default.nix`. It is gated on `boot.swraid.enable` and
+supplies a `PROGRAM` for mdadm's monitor via `mkDefault`, so hosts that set
+`boot.swraid.mdadmConf` keep their own `MAILADDR`/`PROGRAM`. Without either
+directive, `mdmon` crashes and NixOS warns.
+
 ## Required consumer inputs
 
 The modules reference the consumer's `inputs` for `home-manager`,
