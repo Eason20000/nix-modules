@@ -49,6 +49,12 @@ mkWindowsAppNoCC rec {
     mkdir -p "$d"
     ${unzip}/bin/unzip -n ${src} -d "$d"
 
+    # Domino creates IniFiles on its first launch. Create both sides now so
+    # mkWindowsApp's runtime fileMap can replace the app-layer directory with
+    # a symlink to the persistent config directory instead of leaving later
+    # settings in the disposable app layer.
+    mkdir -p "$config_dir/IniFiles" "$d/IniFiles"
+
     winetricks fakejapanese_ipamona
   '';
 
