@@ -50,11 +50,18 @@ is not SOPS coupling.
 ## Boot workarounds
 
 `modules/nixos/hardware/lvm-autoactivation.nix` is on by default and must stay
-imported via `hardware/default.nix`. It runs `vgchange -aay --autoactivation
-event` in stage 2 before `local-fs-pre.target` to recover LVM autoactivation
-that `initrd-cleanup` killed at switch-root. It is gated on
-`services.lvm.enable`, and respects `event_activation = 0` and LVM
-autoactivation filters; do not replace it with `vgchange -ay`.
+imported via `hardware/default.nix`. It patches the initrd copy of lvm2's
+`69-dm-lvm.rules` so the udev-started `lvm-activate-<VG>.service` runs as
+`Type=oneshot` (the start job tracks `vgchange`, not `execve()`), sets
+`IgnoreOnIsolate=yes` (so `initrd-cleanup`'s isolate does not kill it), and is
+ordered `Before=initrd.target` / `Before=initrd-switch-root.target` (so
+switch-root waits for the activation). Do not pass `--property=Type=...`: it
+conflicts with `systemd-run`'s own default `Type=exec`; use
+`--service-type=oneshot`. The patch is initrd-only because
+`initrd-switch-root.target` does not exist in stage 2, and do not add a stage-2
+`vgchange` retry back. The rule is generated from
+`${config.services.lvm.package}` with `substituteInPlace --replace-fail`, so lvm2
+rule changes fail the build rather than silently disabling the fix.
 
 `modules/nixos/hardware/mdadm-monitor.nix` is on by default and must stay
 imported via `hardware/default.nix`. It is gated on `boot.swraid.enable` and

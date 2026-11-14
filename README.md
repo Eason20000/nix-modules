@@ -81,14 +81,33 @@ destination path is configurable via `my.nixos.remoteDiskUnlock.tunnelKeyPath`.
 ## NixOS boot behavior
 
 `modules/nixos/hardware/lvm-autoactivation.nix` is enabled by default. With
-LVM, it adds a stage-2 `vgchange -aay --autoactivation event` service before
-`local-fs-pre.target`. This completes LVM autoactivation
-when the udev transient `lvm-activate-<VG>` service was stopped by
-`initrd-cleanup` during switch-root, which would otherwise leave a VG inactive
-and make its mounts time out after 90 seconds. It respects
-`event_activation = 0`, `auto_activation_volume_list`, and per-VG/LV
-autoactivation flags. Disable it with
+LVM, it patches the initrd copy of lvm2's `69-dm-lvm.rules` so the transient
+`lvm-activate-<VG>.service` started by udev declares its own ordering against
+switch-root:
+
+- `Type=oneshot`, so the unit's start job completes when `vgchange` exits.
+  This is required because `systemd-run` defaults to `Type=exec`, whose start
+  job is finished at `execve()`.
+- `IgnoreOnIsolate=yes`, so `initrd-cleanup`'s isolate does not stop the unit.
+- `Before=initrd.target` and `Before=initrd-switch-root.target`, so the
+  switch-root transaction waits for the activation to finish.
+
+Without this, `initrd-cleanup` stops the transient unit mid-activation, leaves
+`/run/lvm/vgs_online/<VG>` behind, and the stage-2 pvscan skips the VG, making
+its mounts time out after 90 seconds. The stage-2 rule is left untouched, and
+no stage-2 retry is added.
+
+The rule is patched with `substituteInPlace --replace-fail`, so a change to
+lvm2's rule text fails the build instead of silently disabling the fix. The
+option is gated on `boot.initrd.services.lvm.enable`; LVM's normal
+`event_activation`, `auto_activation_volume_list`, and per-VG/LV autoactivation
+settings still apply. Disable it with
 `my.nixos.hardware.lvmAutoactivation.enable = false`.
+
+If a VG only completes after `initrd-cleanup` has already built the isolate
+transaction, the `Before=` ordering cannot be applied retroactively. The unit
+is still not stopped (`IgnoreOnIsolate`) and normally finishes while switch-root
+runs; this window is intentionally not covered by a stage-2 retry.
 
 `modules/nixos/hardware/mdadm-monitor.nix` is enabled by default and only
 applies when `boot.swraid.enable` is true. NixOS warns and `mdmon` crashes when
