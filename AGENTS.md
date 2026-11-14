@@ -62,6 +62,21 @@ supplies a `PROGRAM` for mdadm's monitor via `mkDefault`, so hosts that set
 `boot.swraid.mdadmConf` keep their own `MAILADDR`/`PROGRAM`. Without either
 directive, `mdmon` crashes and NixOS warns.
 
+## Display configuration
+
+`my.nixos.desktop.monitorLayout` installs the consumer's `monitors.xml` as
+`/etc/xdg/monitors.xml`. Mutter reads system configuration directories in every
+session, so this file covers both the GDM greeter and the desktop session. Keep
+the layout path in the consumer: it is host-specific and contains monitor serial
+numbers.
+
+Never route this through `my.home.impermanence.extraFiles`. Mutter saves
+`~/.config/monitors.xml` with `G_FILE_CREATE_REPLACE_DESTINATION`, so the write
+is a `rename()` onto the target. That fails with `EBUSY` on an impermanence bind
+mount, and replaces an impermanence symlink with a regular file in the ephemeral
+root. `/etc/xdg/monitors.xml` is read-only from Mutter's point of view and
+therefore safe.
+
 ## Required consumer inputs
 
 The modules reference the consumer's `inputs` for `home-manager`,

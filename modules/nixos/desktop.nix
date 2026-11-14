@@ -12,6 +12,24 @@ in
 {
   options.my.nixos.desktop = {
     enable = lib.mkEnableOption "";
+
+    monitorLayout = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = ''
+        Monitor configuration installed as /etc/xdg/monitors.xml.
+
+        Mutter reads it as a system configuration in every session,
+        including the GDM greeter, so it sets both the login screen and
+        the desktop layout. Session-level changes made in GNOME Settings
+        are written to `~/.config/monitors.xml` and shadow this file
+        until the next reboot.
+
+        Do not persist `~/.config/monitors.xml` with impermanence
+        instead: Mutter replaces it with `rename()`, which fails with
+        EBUSY on a bind mount.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -113,6 +131,10 @@ in
       file-roller
       resources
     ];
+
+    environment.etc."xdg/monitors.xml" = lib.mkIf (cfg.monitorLayout != null) {
+      source = cfg.monitorLayout;
+    };
 
     programs.dconf.profiles.gdm.databases = [
       {

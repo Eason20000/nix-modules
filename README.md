@@ -99,6 +99,23 @@ directives. Disable it with
 `my.nixos.hardware.mdadmMonitor.enable = false`, or change the handler with
 `my.nixos.hardware.mdadmMonitor.program`.
 
+## Display configuration
+
+`my.nixos.desktop.monitorLayout` installs a Mutter `monitors.xml` as
+`/etc/xdg/monitors.xml`. Mutter also reads `monitors.xml` from
+`g_get_system_config_dirs()`, so one system configuration covers both the GDM
+greeter and the desktop session. Pass a path from the consuming host; that
+keeps the layout and its monitor serial numbers out of this repository.
+
+Do not persist `~/.config/monitors.xml` with
+`my.home.impermanence.extraFiles` instead. Mutter writes that file with
+`g_file_replace_contents()` and `G_FILE_CREATE_REPLACE_DESTINATION`, which is a
+temporary file followed by `rename()`. On an impermanence bind mount the rename
+fails with `EBUSY` and the layout change is dropped; on an impermanence symlink
+the rename replaces the link with a file in the ephemeral root and the change
+is lost on reboot. Layout changes made in GNOME Settings are session only and
+revert to `/etc/xdg/monitors.xml` on reboot.
+
 ## Packages requiring local files
 
 Some packages use `requireFile` and therefore need local files at build time:
