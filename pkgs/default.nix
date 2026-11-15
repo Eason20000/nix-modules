@@ -17,7 +17,6 @@ in
   nixpkgs.overlays = [
     (final: prev: {
       system-status = final.callPackage ./system-status.nix { };
-      mihomo-tui = final.callPackage ./mihomo-tui.nix { };
       libadwaita-kde-kvantum = final.callPackage ./libadwaita-kde-kvantum.nix { };
 
       domino = final.callPackage ./domino.nix {
