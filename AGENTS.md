@@ -106,6 +106,17 @@ No CI, tests, devShell, or flake checks. Verify by building a consuming host;
 `pkgs/zhaoxin` and `modules/nixos/mcc-netboot.nix` use `requireFile`. They only
 need the local file when the affected derivation is built.
 
+## Zhaoxin kernel module installation
+
+`pkgs/zhaoxin/kernel-module/default.nix` must install through kbuild's
+`modules_install` (`installTargets` + `installFlags` + `kernelModuleMakeFlags`
+with `INSTALL_MOD_PATH`). nixpkgs signs every installed module and emits a
+per-module `.ko.cer`; `aggregateModules` concatenates those into `modules.cer`.
+Hand-copying the `.ko` files into `$out` skips both, and a consuming system
+fails with `cat: updates/zx.ko.cer: No such file or directory`
+(NixOS/nixpkgs#575192). Keep `INSTALL_MOD_DIR=updates` so the out-of-tree
+modules do not collide with in-tree ones.
+
 ## Zhaoxin 10-bit scanout
 
 `pkgs/zhaoxin/kernel-module/0020-fix-drop-10bit-plane-formats.patch` removes

@@ -145,6 +145,11 @@ Some packages use `requireFile` and therefore need local files at build time:
   `XRGB2101010` (GNOME/Mutter does) get their 10-bit buffer decoded as 8-bit
   ARGB and colors are corrupted. 8-bit scanout is forced until the mapping is
   fixed and tested.
+  The kernel modules are installed through kbuild's `modules_install` so they
+  are signed and get the `.ko.cer` certificates that nixpkgs' module aggregator
+  concatenates into `modules.cer`. Do not copy the `.ko` files into `$out` by
+  hand: the consuming system then fails to build with
+  `cat: updates/zx.ko.cer: No such file or directory`.
 - `modules/nixos/mcc-netboot.nix`: the `mcc-netboot.tar` archive.
 
 ## Verification

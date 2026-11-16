@@ -4,6 +4,7 @@
   stdenv,
   dpkg,
   kernel,
+  kernelModuleMakeFlags,
 }:
 
 let
@@ -48,6 +49,14 @@ stdenv.mkDerivation {
   dontPatchELF = true;
   patches = modulePatches;
 
+  # Install through kbuild's modules_install so the modules are signed and
+  # get the .ko.cer certificates nixpkgs' module aggregator expects
+  # (NixOS/nixpkgs#575192). Copying the .ko files by hand skips both.
+  makeFlags = kernelModuleMakeFlags ++ [
+    "INSTALL_MOD_PATH=${placeholder "out"}"
+    "INSTALL_MOD_DIR=updates"
+  ];
+
   unpackPhase = ''
     runHook preUnpack
     dpkg -x ${debSrc} deb_contents
@@ -64,13 +73,12 @@ stdenv.mkDerivation {
     runHook postBuild
   '';
 
-  installPhase = ''
-    runHook preInstall
-    mkdir -p $out/lib/modules/${kernel.modDirVersion}/updates
-    cp zx.ko $out/lib/modules/${kernel.modDirVersion}/updates/
-    cp zx_core.ko $out/lib/modules/${kernel.modDirVersion}/updates/
-    runHook postInstall
-  '';
+  installTargets = [ "modules_install" ];
+  installFlags = [
+    "-C"
+    "${kernel.dev}/lib/modules/${kernel.modDirVersion}/build"
+    "M=$(PWD)"
+  ];
 
   meta = {
     maintainers = with lib.maintainers; [ ];
