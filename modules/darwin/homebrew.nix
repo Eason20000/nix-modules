@@ -46,6 +46,7 @@ in
         "xquartz"
         "linearmouse"
         "hiddenbar"
+        "keepingyouawake"
 
         "qq"
         "wechat"
