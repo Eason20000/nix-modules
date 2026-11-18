@@ -38,7 +38,32 @@ in
       btop
     ];
 
-    programs.bash.enable = true;
+    programs.bash = {
+      enable = true;
+      # Same prompt as NixOS' /etc/bashrc, so interactive shells look identical
+      # on NixOS and Darwin.
+      initExtra = ''
+        if [ "$TERM" != "dumb" ] || [ -n "$INSIDE_EMACS" ]; then
+          PROMPT_COLOR="1;31m"
+          ((UID)) && PROMPT_COLOR="1;32m"
+          if [ -n "$INSIDE_EMACS" ]; then
+            PS1="\n\[\033[$PROMPT_COLOR\][\u@\h:\w]\\$\[\033[0m\] "
+          else
+            PS1="\n\[\033[$PROMPT_COLOR\][\[\e]0;\u@\h: \w\a\]\u@\h:\w]\\$\[\033[0m\] "
+          fi
+          if test "$TERM" = "xterm"; then
+            PS1="\[\033]2;\h:\u:\w\007\]$PS1"
+          fi
+        fi
+      '';
+    };
+
+    # Same aliases as NixOS' /etc/bashrc.
+    home.shellAliases = {
+      l = "ls -alh";
+      ll = "ls -l";
+      ls = "ls --color=tty";
+    };
 
     programs.dircolors.enable = true;
 

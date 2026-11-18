@@ -23,7 +23,10 @@ let
             base = {
               hostname = r.base.publicHost or name;
               port = lib.head (r.ssh.ports or [ 22 ]);
-              user = osConfig.my.nixos.base.primaryUser or null;
+            }
+            // lib.optionalAttrs ((r.base.primaryUser or "") != "") {
+              # The remote host's own primary user, not the local one.
+              user = r.base.primaryUser;
             };
           in
           {

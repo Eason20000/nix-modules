@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   my,
   osConfig,
   ...
@@ -19,20 +18,12 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ pkgs.fastfetch ];
-
-    programs.bash = {
-      enable = true;
-      initExtra = ''
-        if [ "''${TERM_SESSION_TYPE:-}" = kms ] && [ -z "$TMUX" ]; then
-          tmux attach-session -t KMSC || tmux new-session -s KMSC
-          exit
-        fi
-      '';
-    };
-
-    programs.tmux.enable = true;
-
+    programs.bash.initExtra = ''
+      if [ "''${TERM_SESSION_TYPE:-}" = kms ] && [ -z "$TMUX" ]; then
+        tmux attach-session -t KMSC || tmux new-session -s KMSC
+        exit
+      fi
+    '';
   };
 
 }

@@ -1,15 +1,7 @@
 { pkgs, ... }:
 
 {
-  home.packages = with pkgs; [
-    coreutils
-    tree
-  ];
-
-  home.shellAliases = {
-    ls = "ls --color=auto";
-    ll = "ls -l --color=auto";
-    la = "ls -a --color=auto";
-  };
-
+  # GNU ls, required by the shared `ls --color=tty` aliases: macOS' BSD ls
+  # does not understand --color.
+  home.packages = [ pkgs.coreutils ];
 }

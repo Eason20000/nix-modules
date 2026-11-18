@@ -1,11 +1,7 @@
 { lib, pkgs, ... }:
 
 let
-  wallpaper = pkgs.fetchurl {
-    url = "https://i.pximg.net/img-original/img/2020/08/31/22/44/30/84070482_p0.jpg";
-    curlOpts = "--referer https://www.pixiv.net/";
-    hash = "sha256-Gr5vdddBZX9qUDcZcpchCFjJ69ZR/Au61qeYSrHbUB0=";
-  };
+  wallpaper = import ../../../wallpaper.nix { inherit pkgs; };
 
 in
 {

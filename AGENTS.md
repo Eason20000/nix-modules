@@ -28,6 +28,15 @@ All custom options live under `my`:
 A module's `config` block reads options via `config.my.*`, not the `my` argument
 (which only carries `my.lib`).
 
+## Interactive shell
+
+The interactive prompt and aliases live in `modules/home/base.nix` (they mirror
+NixOS' `/etc/bashrc`), so NixOS and Darwin shells are identical.
+`modules/darwin/bash.nix` only provides the system-wide bash and its
+completions; do not put `PS1` there again. Likewise, do not re-enable bash,
+tmux, or add `fastfetch` in feature modules — `base.nix` and `tmux.nix`
+already provide them.
+
 ## Paths
 
 Public modules use relative imports. Do **not** add a repo-root helper such as
