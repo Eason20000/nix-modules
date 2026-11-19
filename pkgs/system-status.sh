@@ -31,11 +31,11 @@ done
 
 SEPARATOR="${separator_arg:- }"
 
-# Nerd Font icons
-CPU_ICON=""
-RAM_ICON=""
-UP_ICON=""
-DOWN_ICON=""
+# Nerd Font icons, written as escapes so the source stays ASCII.
+CPU_ICON=$'\uF4BC'   # nf-oct-cpu
+RAM_ICON=$'\uEFC5'   # nf-fa-memory
+UP_ICON=$'\uF062'    # nf-fa-arrow_up
+DOWN_ICON=$'\uF063'  # nf-fa-arrow_down
 
 # Raw counters plus the last computed deltas are shared by everything that
 # reads the same tmux server. A one second cache keeps multiple clients and
