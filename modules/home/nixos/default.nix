@@ -11,7 +11,6 @@
     ./impermanence
     ./waydroid.nix
     ./kmscon-auto-tmux.nix
-    ./tmux.nix
     ./xdg.nix
     ./ssh.nix
   ]

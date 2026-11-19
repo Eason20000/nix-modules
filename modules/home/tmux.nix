@@ -14,6 +14,7 @@
       set-option -g status-position top
       set-option -g status-style "bg=color232 fg=color255"
       set-option -g status-interval 1
+      set-option -g status-right "#(${pkgs.system-status}/bin/system-status)"
       set-option -g status-right-length 60
       set-option -g pane-border-status top
       set-option -g pane-border-format "#{pane_current_command}"

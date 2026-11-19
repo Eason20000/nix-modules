@@ -37,6 +37,17 @@ completions; do not put `PS1` there again. Likewise, do not re-enable bash,
 tmux, or add `fastfetch` in feature modules — `base.nix` and `tmux.nix`
 already provide them.
 
+## System status
+
+`pkgs/system-status` feeds tmux' `status-right` (set in `modules/home/tmux.nix`,
+so NixOS and Darwin share it). It is one-shot by design: tmux forks it on every
+refresh. All numbers come from `libstatgrab`'s `statgrab -n`, which reports the
+same keys on Linux and Darwin — do not add `uname` branches or call system
+tools such as `top`/`vm_stat`/`netstat`. CPU and network are deltas between
+runs, so the last counters live in `${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/system-status-$(id -u)/state-<key>`,
+keyed by the tmux server (`$TMUX` without the session field) and cached for one
+second so multiple clients or sessions do not sample concurrently.
+
 ## Paths
 
 Public modules use relative imports. Do **not** add a repo-root helper such as
