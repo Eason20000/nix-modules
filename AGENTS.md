@@ -47,8 +47,9 @@ tools such as `top`/`vm_stat`/`netstat`. CPU and network are deltas between
 runs, so the last counters live in `${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/system-status-$(id -u)/state-<key>`,
 keyed by the tmux server (`$TMUX` without the session field) and cached for one
 second so multiple clients or sessions do not sample concurrently. The Nerd
-Font icons must stay as bash escapes (`CPU_ICON=$'\uF4BC'`); literal
-private-use codepoints get lost when the file is rewritten.
+Font icons must stay as raw byte escapes (`CPU_ICON=$'\xEF\x92\xBC'`);
+`\u` escapes are left verbatim under a C locale and literal codepoints get
+lost when the file is rewritten.
 
 ## Paths
 

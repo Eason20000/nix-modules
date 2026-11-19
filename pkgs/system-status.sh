@@ -31,11 +31,12 @@ done
 
 SEPARATOR="${separator_arg:- }"
 
-# Nerd Font icons, written as escapes so the source stays ASCII.
-CPU_ICON=$'\uF4BC'   # nf-oct-cpu
-RAM_ICON=$'\uEFC5'   # nf-fa-memory
-UP_ICON=$'\uF062'    # nf-fa-arrow_up
-DOWN_ICON=$'\uF063'  # nf-fa-arrow_down
+# Nerd Font icons as raw UTF-8 byte escapes: bash leaves \u escapes verbatim
+# under a C locale, \x works everywhere.
+CPU_ICON=$'\xEF\x92\xBC'   # U+F4BC nf-oct-cpu
+RAM_ICON=$'\xEE\xBF\x85'   # U+EFC5 nf-fa-memory
+UP_ICON=$'\xEF\x81\xA2'    # U+F062 nf-fa-arrow_up
+DOWN_ICON=$'\xEF\x81\xA3'  # U+F063 nf-fa-arrow_down
 
 # Raw counters plus the last computed deltas are shared by everything that
 # reads the same tmux server. A one second cache keeps multiple clients and
