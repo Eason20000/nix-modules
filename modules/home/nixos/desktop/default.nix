@@ -31,6 +31,7 @@
     domino
     blender
     inputs.prelude.packages.x86_64-linux.default
+    osu-lazer
   ];
 
   programs.lutris = {
