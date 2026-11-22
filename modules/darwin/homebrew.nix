@@ -47,6 +47,7 @@ in
         "linearmouse"
         "hiddenbar"
         "keepingyouawake"
+        "gimp"
 
         "qq"
         "wechat"
