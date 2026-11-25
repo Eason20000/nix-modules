@@ -55,6 +55,11 @@ in
 
     "org/gnome/desktop/peripherals/mouse".accel-profile = "flat";
 
+    "org/gnome/desktop/peripherals/touchpad" = {
+      accel-profile = "flat";
+      speed = 0.6;
+    };
+
     "org/gnome/desktop/input-sources".xkb-options = [
       "caps:ctrl_shifted_capslock"
     ];
